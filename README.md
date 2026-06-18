@@ -2,7 +2,7 @@
 
 **Lógica de primer orden simbólica para Python** — biblioteca estilo SymPy para construir,
 transformar, evaluar e imprimir fórmulas FO, estructuras finitas y algoritmos de
-**definibilidad abierta** (sin cuantificadores) sobre álgebras finitas.
+**definibilidad en varios fragmentos** (QF/HIT, PP, EP, Horn, FO acotado) sobre álgebras finitas.
 
 | | |
 |---|---|
@@ -10,37 +10,38 @@ transformar, evaluar e imprimir fórmulas FO, estructuras finitas y algoritmos d
 | **Python** | ≥ 3.10 |
 | **Licencia** | MIT |
 | **Dependencias runtime** | ninguna (núcleo puro Python) |
-| **Extras** | `[draw]` matplotlib/numpy · `[dev]` pytest/ruff/mypy · `[solvers]` z3 |
+| **Extras** | `[draw]` · `[dev]` · `[solvers]` · `[docs]` · `[fast]` · `[viz]` · `[all]` |
 
 ---
 
 ## Tabla de contenidos
 
 1. [¿Qué es fopy?](#qué-es-fopy)
-2. [Instalación](#instalación)
-3. [Inicio rápido](#inicio-rápido)
-4. [Arquitectura](#arquitectura)
-5. [Capa simbólica FO](#capa-simbólica-fo)
-6. [Estructuras y semántica](#estructuras-y-semántica)
-7. [Constructores de estructuras](#constructores-de-estructuras)
-8. [Puente simbólico ↔ finito](#puente-simbólico--finito)
-9. [Capa finita: modelos y fórmulas abiertas](#capa-finita-modelos-y-fórmulas-abiertas)
-10. [Formato `.model`](#formato-model)
-11. [Definibilidad abierta (HIT)](#definibilidad-abierta-hit)
-12. [Explicar definibilidad (`explain_definability`)](#explicar-definibilidad-explain_definability)
-13. [Certificados verificables](#certificados-verificables)
-14. [Model checking y síntesis](#model-checking-y-síntesis)
-15. [Álgebra universal finita](#álgebra-universal-finita)
-16. [Formas normales](#formas-normales)
-17. [Impresión y exportación](#impresión-y-exportación)
-18. [Diagramas de Hasse (`draw`)](#diagramas-de-hasse-draw)
-19. [Teorías y enumeración de modelos](#teorías-y-enumeración-de-modelos)
-20. [Solvers opcionales (Z3)](#solvers-opcionales-z3)
-21. [Scripts y CLI](#scripts-y-cli)
-22. [Desarrollo y CI](#desarrollo-y-ci)
-23. [Layout del repositorio](#layout-del-repositorio)
-24. [Decisiones de diseño (ADRs)](#decisiones-de-diseño-adrs)
-25. [Limitaciones y alcance](#limitaciones-y-alcance)
+2. [Mapa de capacidades](#mapa-de-capacidades)
+3. [Instalación](#instalación)
+4. [Inicio rápido](#inicio-rápido)
+5. [Arquitectura](#arquitectura)
+6. [Capa simbólica FO](#capa-simbólica-fo)
+7. [Estructuras y semántica](#estructuras-y-semántica)
+8. [Constructores de estructuras](#constructores-de-estructuras)
+9. [Puente simbólico ↔ finito](#puente-simbólico--finito)
+10. [Capa finita: modelos y fórmulas abiertas](#capa-finita-modelos-y-fórmulas-abiertas)
+11. [Formato `.model`](#formato-model)
+12. [Definibilidad abierta (HIT)](#definibilidad-abierta-hit)
+13. [Explicar definibilidad (`explain_definability`)](#explicar-definibilidad-explain_definability)
+14. [Certificados verificables](#certificados-verificables)
+15. [Model checking y síntesis](#model-checking-y-síntesis)
+16. [Álgebra universal finita](#álgebra-universal-finita)
+17. [Formas normales](#formas-normales)
+18. [Impresión y exportación](#impresión-y-exportación)
+19. [Diagramas de Hasse (`draw`)](#diagramas-de-hasse-draw)
+20. [Teorías y enumeración de modelos](#teorías-y-enumeración-de-modelos)
+21. [Solvers opcionales (Z3)](#solvers-opcionales-z3)
+22. [Scripts y CLI](#scripts-y-cli)
+23. [Desarrollo y CI](#desarrollo-y-ci)
+24. [Layout del repositorio](#layout-del-repositorio)
+25. [Decisiones de diseño (ADRs)](#decisiones-de-diseño-adrs)
+26. [Limitaciones y alcance](#limitaciones-y-alcance)
 
 ---
 
@@ -76,6 +77,73 @@ produce una explicación legible, una fórmula testigo (caso positivo) u obstruc
 
 ---
 
+## Mapa de capacidades
+
+Referencia rápida de **qué puede hacer la librería hoy** (v0.1 alpha). Detalle en las secciones siguientes.
+
+### Núcleo simbólico (`import fopy as fo`)
+
+| Capacidad | API principal |
+|-----------|----------------|
+| Variables, firmas, términos, fórmulas FO | `symbols`, `Signature`, `Apply`, `Atom`, `forall` / `exists`, `eq` |
+| API estilo notebook | `fo.Vars("x y")`, `fo.Function("f", 2)`, `fo.Relation("R", 2)` |
+| Parser FO | `parse_formula("forall x ...")` — Unicode o palabras clave |
+| Sustitución, α-equivalencia | `substitute`, `rename_bound`, `alpha_equivalent`, `free_vars` |
+| Formas normales | `to_nnf`, `to_prenex`, `to_cnf`, `to_dnf` |
+| Many-sorted lite | `Sort`, `Structure.universes`, cuantificadores por sort |
+| Estructuras finitas | `Structure.from_tables`, `satisfy`, `evaluate`, `extension` |
+| Constructores | `fo.builders.chain`, `boolean_lattice`, `m3`, `n5`, `from_cayley`, fluent API |
+| Teorías / variedades | `Theory` / `Variety`, axiomas, `consequence`, `compare` |
+| Enumeración pequeña | `models_of_cardinality(n)` — n ≤ 3, funciones y relaciones acotadas |
+| Álgebra libre acotada | `Variety.free_algebra_generators(n, max_depth=…)` |
+| Impresión | `sstr`, `pprint`, `latex` |
+| Export lógico | TPTP / TFF (`to_tptp`, `Formula.to_tff`), SMT-LIB (`to_smtlib`) |
+| Hash-cons opcional | `fopy.core.hashcons.enable_hashcons()` — interna AST |
+
+### Capa finita (`fopy.finite`)
+
+| Capacidad | API principal |
+|-----------|----------------|
+| Cargar álgebras | `parse_model("*.model")`, `Model`, `Operation`, `Relation` |
+| Fórmulas abiertas QF | `open_formulas`, `parse_open_formula`, `eq`, `and` / `or` / `neg` |
+| Model checking | `models`, `counterexample`, `satisfying_assignments` |
+| Cache de evaluación | `EvalCache`, `satisfy_cached` |
+| Evaluación rápida | `eval_fast` (numpy/bitsets con `[fast]` o `[draw]`) |
+| **Definibilidad QF (HIT)** | `is_open_definable`, `check_definability`, `HitConfig` |
+| **Multi-fragmento** | `explain_definability(..., fragment=)` — `qf`, `pp`, `ep`, `horn`, `fo` |
+| Explicación + obstrucciones | `ExplainReport`, `atomic_type`, `proof_sketch`, LaTeX |
+| Certificados JSON v2 | `serialize_certificate`, `verify_certificate`, `TrustedKernel` |
+| Síntesis de fórmulas | `synthesize_defining_formula`, `formula_complexity` |
+| Búsqueda / CEGIS / SMT | `FormulaSearch`, `cegis_synthesize`, `smt_synthesize` (Z3) |
+| Preprocesamiento targets | `split_targets`, patrones de tuplas |
+| Producto directo | `direct_product` |
+| Métodos en `Model` | `term_functions`, `subalgebra_generated_by`, `show_tables`, … |
+
+### Álgebra universal (`fopy.universal`)
+
+| Capacidad | API principal |
+|-----------|----------------|
+| Subálgebras, congruencias | `subalgebra`, `congruence_lattice`, `quotient` |
+| Homomorfismos / embeddings | `homomorphisms`, `is_embedding` (universos ≤ 6) |
+| Retículos, álgebras de Boole | `is_lattice`, `is_distributive_lattice`, `is_boolean_algebra` |
+| Clon de operaciones | `term_clone`, identidades término |
+| Dibujo retículo congruencias | `draw_congruence_lattice` (con `[draw]`) |
+
+### Visualización y solvers (opcionales)
+
+| Extra | Capacidad |
+|-------|-----------|
+| `[draw]` | Hasse SVG, layout Freese/LatDraw, CLI `fopy-draw` |
+| `[viz]` | Export Graphviz, TikZ, Mermaid, HTML desde diagramas |
+| `[solvers]` | Z3: `check_sat_smt`, `prove_formula`, backend síntesis SMT |
+| `[docs]` | Sitio MkDocs + mkdocstrings (`mkdocs build --strict`) |
+
+### Puente entre capas
+
+`to_finite_model` / `from_finite_model` / `load_structure` conectan `Structure` simbólico y `Model` tabular.
+
+---
+
 ## Instalación
 
 ### Desarrollo local (recomendado)
@@ -98,9 +166,12 @@ pip install -e .
 
 | Extra | Paquetes | Uso |
 |-------|----------|-----|
-| `draw` | numpy, matplotlib | diagramas de Hasse, `fopy-draw` |
+| `draw` | numpy, matplotlib | diagramas Hasse, `fopy-draw` |
 | `dev` | pytest, ruff, mypy, hypothesis | desarrollo y CI |
-| `solvers` | z3-solver | backend SMT opcional |
+| `solvers` | z3-solver | `prove_formula`, síntesis SMT |
+| `docs` | mkdocs, mkdocstrings | sitio API autogenerado |
+| `fast` | numpy | `eval_fast` sin matplotlib |
+| `viz` | (metadato) | tests export Graphviz/TikZ/Mermaid |
 | `all` | todo lo anterior | entorno completo |
 
 ```bash
@@ -198,6 +269,17 @@ import fopy as fo
 # o imports puntuales desde fopy.formulas, fopy.terms, fopy.symbols, …
 ```
 
+### API estilo notebook
+
+Alias pensados para cuadernos y el documento de visión del proyecto:
+
+```python
+x, y = fo.Vars("x y")                  # una o varias variables
+f = fo.Function("f", 2)                # símbolo de función aplicable: f(x, y)
+R = fo.Relation("R", 2)                # átomo relacional: R(x, y)
+phi = fo.forall(x, fo.eq(f(x, x), x))
+```
+
 ### Firmas y símbolos
 
 ```python
@@ -271,6 +353,27 @@ fo.simplify(phi)                       # reescrituras locales
 ```python
 nnf = fo.to_nnf(phi)                   # negación normal
 prenex = fo.to_prenex(phi)             # forma prenexa
+cnf = fo.to_cnf(phi)                   # conjuntiva (clausular)
+dnf = fo.to_dnf(phi)                   # disyuntiva
+```
+
+### Many-sorted lite
+
+Carriers nombrados por sort y export TFF para demostradores:
+
+```python
+from fopy.sorts import Sort
+
+sig = fo.Signature(relations={"R": 2})
+s = fo.Structure(
+    sig,
+    universe=[0, 1, 2],
+    universes={"U": [0, 1], "V": [0, 2]},
+)
+x = fo.Variable("x", Sort("U"))
+y = fo.Variable("y", Sort("V"))
+phi = fo.parse_formula("forall x:U exists y:V R(x,y)", rels={"R": 2})
+print(phi.to_tff())                    # salida TFF para TPTP
 ```
 
 ---
@@ -611,22 +714,39 @@ testigos (con fallback a `is_open_definable` si el par no es ideal).
 
 ```python
 from fopy.finite import models, counterexample, satisfying_assignments
+from fopy.finite.eval_cache import EvalCache
 
 phi = parse_open_formula("eq(x,x)", {"x": x}, m.operations)
 assert models(m, phi)                  # ¿válida para toda asignación?
 ce = counterexample(m, phi)            # None si válida
 assigns = satisfying_assignments(m, phi)
+
+cache = EvalCache()
+models(m, phi, cache=cache)            # reutiliza subfórmulas
 ```
+
+Con `[fast]` o `[draw]`, `eval_fast` acelera igualdades y comparación de extensiones vía numpy/bitsets.
 
 ### Síntesis de fórmula mínima (post-hoc)
 
 Búsqueda por enumeración de ecuaciones `eq(t1,t2)` hasta `max_depth`:
 
 ```python
-from fopy.finite import synthesize_defining_formula, SynthesisResult
+from fopy.finite import synthesize_defining_formula, SynthesisResult, FormulaSearch
 
 syn: SynthesisResult = synthesize_defining_formula(m, target, max_depth=3)
 print(syn.formula, syn.minimal, syn.min_term_depth)
+
+search = FormulaSearch(m, target, fragment="pp").run()
+```
+
+### Síntesis avanzada (CEGIS / SMT)
+
+```python
+from fopy.finite import cegis_synthesize, smt_synthesize
+
+cegis = cegis_synthesize(m, target, max_depth=2)
+smt = smt_synthesize(m, target, max_depth=2)   # requiere z3
 ```
 
 Si la enumeración falla, cae en HIT vía `is_open_definable`.
@@ -675,6 +795,8 @@ Sobre el AST simbólico (`fopy.formulas`):
 ```python
 nnf = fo.to_nnf(phi)       # elimina ¬ anidados; De Morgan; cuantificadores
 prenex = fo.to_prenex(phi) # mueve cuantificadores al frente
+cnf = fo.to_cnf(phi)       # CNF (puede aumentar tamaño)
+dnf = fo.to_dnf(phi)       # DNF
 ```
 
 ---
@@ -699,10 +821,11 @@ from fopy.printing.open import sstr as open_sstr, latex as open_latex
 ### Intercambio lógico
 
 ```python
-from fopy.printing.tptp import to_tptp
+from fopy.printing.tptp import to_tptp, to_tff
 from fopy.printing.smtlib import to_smtlib
 
 print(to_tptp(phi, name="conj"))
+print(phi.to_tff())                    # many-sorted TFF
 print(to_smtlib(phi))
 ```
 
@@ -737,12 +860,27 @@ draw_lattice(fo.builders.chain(5), filename="out/chain5.svg")
 Layout estilo **Freese/LatDraw**: niveles, fuerzas 3D, proyección 2D óptima.
 Ver [docs/design/002-hasse-layout.md](docs/design/002-hasse-layout.md).
 
+### Export a otros formatos (`[draw]` / `[viz]`)
+
+```python
+from fopy.draw.mermaid_export import (
+    hasse_to_graphviz,
+    hasse_to_html,
+    hasse_to_mermaid,
+    hasse_to_tikz,
+)
+
+# pos: dict elemento -> (x, y) del layout
+dot = hasse_to_graphviz(covers, pos)
+mmd = hasse_to_mermaid(covers, pos)
+```
+
 ---
 
 ## Teorías y enumeración de modelos
 
 ```python
-from fopy.theories import Theory
+from fopy.theories import Theory, Variety
 
 T = Theory(
     sig,
@@ -752,12 +890,19 @@ T = Theory(
     ],
 )
 
-# Fuerza bruta: modelos de cardinalidad n (solo n ≤ 3, pocas relaciones)
+# Fuerza bruta: modelos de cardinalidad n (n ≤ 3; espacio acotado)
 for M in T.models_of_cardinality(2):
     print(M)
+
+T.consequence(axiom, n=2)              # ¿vale en todos los modelos de tamaño n?
+T.finite_counterexample(n=2)           # contraejemplo finito, si existe
+T.compare(other_variety)               # subvariedad / incomparables / …
+
+# Álgebra libre acotada (solo firma funcional)
+F = T.free_algebra_generators(2, max_depth=2)
 ```
 
-Útil para experimentos pequeños; no escala.
+`Variety` es alias de `Theory`. La enumeración incluye **funciones y relaciones** con topes internos; no escala más allá de experimentos pequeños.
 
 ---
 
@@ -768,11 +913,15 @@ pip install -e ".[solvers]"
 ```
 
 ```python
-from fopy.solvers import check_sat_smt, z3_available
+from fopy.solvers import check_sat_smt, prove_formula, z3_available, to_z3
 
 if z3_available():
+    assert prove_formula(fo.eq(x, x)) is True
     result = check_sat_smt(phi)        # experimento SMT-LIB
+    z3_expr = to_z3(phi)               # traducción a Z3
 ```
+
+La síntesis `smt_synthesize` en `fopy.finite` usa Z3 cuando está instalado.
 
 ---
 
@@ -851,7 +1000,10 @@ fopy/
 │   ├── transform.py         # free_vars, substitute, …
 │   ├── normal_forms.py        # to_nnf, to_prenex
 │   ├── simplify.py          # reescrituras
-│   ├── theories.py          # Theory, enumeración
+│   ├── theories.py          # Theory / Variety
+│   ├── theory_free_algebra.py  # álgebra libre acotada
+│   ├── api.py               # Vars, Function, Relation
+│   ├── sorts.py             # many-sorted lite
 │   ├── bridge.py            # Structure ↔ Model
 │   ├── builders/            # chain, B_n, from_covers, fluent API
 │   ├── parse/               # parse_formula, parse_model
@@ -901,10 +1053,11 @@ fopy/
 
 | Área | Estado |
 |------|--------|
-| Fragmento QF / open | soportado |
-| Cuantificadores en definibilidad | no (solo capa simbólica) |
+| Fragmentos definibilidad | `qf` (HIT), `pp`, `ep`, `horn`, `fo` (k-tipos, \|U\| pequeño) |
+| Cuantificadores en definibilidad | no en targets (sí en capa simbólica) |
 | Constelaciones / Minion | fuera de alcance |
 | `Theory.models_of_cardinality` | n ≤ 3, espacio acotado (funciones + relaciones) |
+| `free_algebra_generators` | firma funcional, profundidad acotada |
 | `homomorphisms` | universos ≤ 6 |
 | Enumeración HIT | puede ser lenta en álgebras grandes |
 | PyPI | no disponible aún |

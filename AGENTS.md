@@ -10,7 +10,7 @@ Guide for coding agents working in this repo. See [README.md](README.md) for use
 - **Dev**: `pytest`, `pytest-cov`, `ruff`, `mypy`, `hypothesis`
 - **Docs**: `mkdocs`, `mkdocs-material`, `mkdocstrings` (`[docs]` extra)
 - **Optional extras**: `[solvers]` (z3), `[viz]`, `[fast]` (numpy eval hooks), `[draw]` (matplotlib Hasse).
-- **CI**: GitHub Actions — `core`, `finite`, `solvers`, `viz`, `docs` jobs.
+- **CI**: GitHub Actions jobs `test` (ruff + mypy + pytest core/finite), `docs`, `solvers`, `viz`.
 - **Agent rules**: `.cursor/rules/static-analysis.mdc`, `.cursor/rules/docstrings-manual.mdc`, `.cursor/rules/type-annotations.mdc`, `.cursor/rules/docs-autogen.mdc`
 - **License**: MIT
 
@@ -18,7 +18,9 @@ Guide for coding agents working in this repo. See [README.md](README.md) for use
 
 ```bash
 # install (local dev)
-pip install -e ".[dev,draw]"
+pip install -e ".[dev,draw]"        # default dev
+pip install -e ".[dev,solvers]"     # Z3 tests
+pip install -e ".[all]"
 
 # lint + format + types (CI)
 ruff check src tests
@@ -28,9 +30,11 @@ mypy src/fopy
 # tests — full local check (matches dev workflow)
 pytest tests/ -m "not slow" --cov=fopy --cov-report=term-missing
 
-# tests — as in CI (split jobs)
+# tests — as in CI (split steps in test job)
 pytest tests/ -m "not slow and not finite" --cov=fopy --cov-fail-under=85
 pytest tests/ -m "finite and not slow" --cov=fopy.finite --cov-fail-under=70
+pytest tests/ -m solvers -q       # CI solvers job (needs z3)
+pytest tests/test_viz_exports.py -q   # CI viz job
 
 # API docs (from docstrings; CI gate)
 pip install -e ".[docs,draw]"
@@ -39,6 +43,7 @@ mkdocs serve   # http://127.0.0.1:8000
 
 # quick / targeted
 pytest tests/test_core.py -q
+pytest tests/test_remaining_gaps.py -q
 pytest -m draw          # needs matplotlib
 pytest -m finite
 python scripts/demo_fo.py
@@ -56,7 +61,10 @@ Not detected: `make`, `tox`, Docker, migrations, build/publish to PyPI.
 |------|---------|
 | `src/fopy/` | Public API (`import fopy as fo`) |
 | `src/fopy/core/` | `Basic` AST base, `walk`/`transform` |
-| `src/fopy/formulas.py`, `terms.py`, `symbols.py`, `semantics.py`, `transform.py` | Symbolic FO layer |
+| `src/fopy/api.py` | Notebook-style aliases (`Function`, `Relation`, `Vars`) |
+| `src/fopy/theories.py`, `theory_free_algebra.py` | `Variety` / `Theory`, bounded free term algebras |
+| `src/fopy/bridge.py`, `sorts.py` | `Structure` ↔ `Model` bridge; many-sorted lite |
+| `src/fopy/formulas.py`, `terms.py`, `symbols.py`, `semantics.py`, `transform.py` | Symbolic FO layer (incl. TPTP/TFF export) |
 | `src/fopy/builders/` | `Structure` builders (covers, Cayley, catalog B₂/M₃/N₅…) |
 | `src/fopy/parse/` | `parse_formula`, `parse_model` (`.model` format) |
 | `src/fopy/printing/` | `sstr`, `pprint`, `latex` |
@@ -74,7 +82,8 @@ Not detected: `make`, `tox`, Docker, migrations, build/publish to PyPI.
 
 - **Two layers**: (1) symbolic `Structure` + FO formulas; (2) `fopy.finite.Model` for algorithms on integers/universe tables.
 - **Open definability**: `fopy.finite.check_definability` / `Definability.explain` — fragments `qf` (HIT), `pp`, `ep`, `horn`, `fo` (k-types, small `|U|`). Legacy alias: `is_open_definable` (= `qf`).
-- **Eval cache**: `fopy.finite.eval_cache.EvalCache` wired through `model_checking` and open-formula `extension`.
+- **Eval cache / fast paths**: `eval_cache`, `eval_fast` (numpy/bitsets when `[fast]` or draw deps present).
+- **Theories**: `Variety.models_of_cardinality` brute-forces small models (n ≤ 3, capped); `free_algebra_generators` uses `theory_free_algebra`.
 - **Hash-cons**: `fopy.core.hashcons.enable_hashcons()` interns `Variable`, `Apply`, `Constant`, `Atom`, `Eq`.
 - **`.model` parser**: OpenDefAlgSplitting format; `eq(x,y)` not `==`.
 - **`draw`**: optional extra; keep core importable without numpy/matplotlib.
@@ -82,9 +91,9 @@ Not detected: `make`, `tox`, Docker, migrations, build/publish to PyPI.
 ## Conventions
 
 - **Language**: English for code, docstrings, tests, errors, and docs.
-- **Docstrings**: Google style, **very explanatory** (manual is generated from source); see `.cursor/rules/docstrings-manual.mdc`. Build API HTML with `pdoc -o docs/api fopy --docformat google`.
+- **Docstrings**: Google style; API docs via **mkdocs** + mkdocstrings (see `.cursor/rules/docstrings-manual.mdc`, `.cursor/rules/docs-autogen.mdc`).
 - **Types**: every function/method in `src/fopy/` fully annotated; `mypy src/fopy` must pass (`disallow_untyped_defs`). See `.cursor/rules/type-annotations.mdc`.
-- **Style**: `ruff` lint + format, `mypy` on `src/fopy` only, line length 100, target Python 3.10.
+- **Style**: `ruff` lint + format, `mypy` on `src/fopy` only, line length 100, target Python 3.10. Per-file: `N802` in `api.py`; `RUF001`/`RUF002` for logic Unicode.
 - **Scope**: minimal diffs; match existing patterns; avoid drive-by refactors.
 - **Commits**: not automated here; use conventional commits if asked (`feat`, `fix`, `test`, …).
 - **No PyPI** yet — local editable install only.
@@ -112,6 +121,4 @@ Not detected: `make`, `tox`, Docker, migrations, build/publish to PyPI.
 
 - [README.md](README.md) — quick start
 - [.cursor/rules/static-analysis.mdc](.cursor/rules/static-analysis.mdc) — lint/type gates
-- [docs/design/001-hit-definability.md](docs/design/001-hit-definability.md) — why HIT, not constellations
-- [docs/design/002-hasse-layout.md](docs/design/002-hasse-layout.md) — draw module
-- [docs/design/003-builders.md](docs/design/003-builders.md) — structure builders
+- [docs/design/001-hit-definability.md](docs/design/001-hit-definability.md) — HIT vs constellations
