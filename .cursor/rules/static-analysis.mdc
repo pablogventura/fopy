@@ -1,0 +1,40 @@
+---
+description: Static analysis gates for fopy (ruff, mypy, format)
+alwaysApply: true
+---
+
+# Static analysis
+
+All changes must pass local checks before commit:
+
+```bash
+ruff check src tests
+ruff format --check src tests
+mypy src/fopy
+mkdocs build --strict   # requires: pip install -e ".[docs,draw]"
+pytest tests/ -m "not slow" --cov=fopy
+```
+
+## Ruff
+
+- Line length **100**, target **Python 3.10+**.
+- Enabled: pycodestyle/pyflakes (`E`, `W`, `F`), isort (`I`), bugbear (`B`), pyupgrade (`UP`), simplify (`SIM`), ruff (`RUF`), pep8-naming (`N`), comprehensions (`C4`), pie (`PIE`), returns (`RET`), pytest style (`PT`), implicit concat (`ISC`), pylint warnings (`PLW`), eradicate (`ERA`), pygrep (`PGH`).
+- Intentional exceptions: `N815` (SymPy-style `is_Term` flags), `RUF001` (logic Unicode), `RUF005` (concat style).
+- Tests may use broad `pytest.raises` (`PT011`) and `Exception` in raises (`B017`).
+
+## Mypy
+
+- Scope: `src/fopy` only (not tests).
+- `disallow_untyped_defs`, `check_untyped_defs`, `disallow_incomplete_defs`, `no_implicit_optional`, `strict_equality`.
+- See `.cursor/rules/type-annotations.mdc` for annotation policy.
+- Optional draw deps: `ignore_missing_imports` for `matplotlib` / `numpy`.
+
+## Format
+
+- `ruff format` is the formatter; do not hand-format unrelated files.
+- Do not disable lint/type gates without justification in the PR/commit message.
+
+## Fixes
+
+- Prefer real types (`cast`, widen `Interpretation`, rename shadowed names) over `# type: ignore`.
+- Do not delete or weaken tests to green the suite.

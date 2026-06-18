@@ -1,0 +1,155 @@
+---
+description: Very explanatory docstrings on all public API — manual generated from source
+alwaysApply: true
+---
+
+# Docstrings for API manual
+
+Public API in `src/fopy/` is documented **in code** so a manual can be built without duplicating prose in README or separate docs.
+
+**Language:** English (matches code, errors, and tests).
+
+**Tone:** Docstrings must be **very, very explanatory** — written for someone who knows Python but not this codebase or the underlying logic. Assume the generated manual is the primary learning material.
+
+## What must have a docstring
+
+| Item | Required |
+|------|----------|
+| Every `src/fopy/**/*.py` **module** | Yes — summary + paragraph on role in the library |
+| Every **public** class (`__all__`, re-exported, or undecorated name) | Yes |
+| Every **public** function / method | Yes |
+| `@property`, `@classmethod`, `@staticmethod` public | Yes |
+| Private `_name` | Only if non-obvious |
+| `tests/` | Docstring on shared helpers/fixtures in `conftest.py`, `helpers_*.py` |
+
+Add or update docstrings in the **same change** that adds or changes public behaviour. Do not merge undocumented public API.
+
+## Explanatory depth (mandatory)
+
+A one-liner is **not enough** for public API. Each docstring should read like a short encyclopedia entry:
+
+1. **What** — purpose in plain language (first line, imperative).
+2. **Why** — when to use it, how it fits the FO / finite / definability workflow.
+3. **How** — algorithm sketch, invariants, or semantics (without duplicating every line of code).
+4. **Inputs/outputs** — every parameter and return value explained with types *and meaning* (not just restating the name).
+5. **Edge cases** — empty universes, missing symbols, negative certificates, unsupported fragments, size limits.
+6. **Relations** — link to related functions, classes, ADRs, and the dual AST layers when relevant.
+
+**Minimum length guidance** (public symbols):
+
+| Symbol kind | Expect |
+|-------------|--------|
+| Module | 2–5 sentences + see-also |
+| Entry-point function | Summary + why + full Args/Returns/Raises + Example |
+| Class | Role + Attributes + typical usage |
+| Method on public class | At least summary + Args/Returns when non-trivial |
+
+Prefer **concrete** over abstract: name file formats (``.model``), fragment aliases (``"qf"``), and what the user receives (formula text, obstruction pair, certificate dict).
+
+## Style: Google (pdoc / mkdocstrings compatible)
+
+```python
+def explain_definability(
+    algebra: Model | Structure,
+    target: Relation | str,
+    *,
+    fragment: str = "qf",
+) -> ExplainReport:
+  """Decide and explain open definability of a target relation on a finite algebra.
+
+  This is the main user-facing entry point for definability analysis. It runs the
+  same decision procedure as :func:`~fopy.finite.is_open_definable` (HIT plus target
+  splitting) but packages the outcome for humans and for offline verification:
+  a readable narrative, witness formula or obstruction, and a JSON certificate.
+
+  Use this when you need more than a boolean answer — papers, debugging, or
+  sharing reproducible results without re-running the full search.
+
+  Args:
+      algebra: Finite :class:`~fopy.finite.models.Model` or symbolic
+          :class:`~fopy.structures.Structure` (converted automatically).
+      target: Name of the target relation (e.g. ``"T0"``) or the
+          :class:`~fopy.finite.relops.Relation` object itself.
+      fragment: Quantifier-free fragment; ``"qf"``, ``"open"``, and
+          ``"quantifier-free"`` are equivalent. Other fragments raise
+          :exc:`NotImplementedError`.
+
+  Returns:
+      :class:`~fopy.finite.explain.ExplainReport` with ``definable`` flag,
+      optional defining formula, obstruction witnesses, and certificate helpers.
+
+  Raises:
+      NotImplementedError: If *fragment* is not supported.
+      KeyError: If *target* is not found on the model.
+
+  Examples:
+      >>> from fopy.parse import parse_model
+      >>> from fopy.finite import explain_definability
+      >>> m = parse_model("tests/fixtures/models/minimal.model")
+      >>> explain_definability(m, "T0").definable
+      True
+  """
+```
+
+### Class docstring
+
+```python
+@dataclass
+class ExplainReport:
+  """Human-readable definability outcome with certificate export.
+
+  Produced by :func:`~fopy.finite.explain.explain_definability`. Wraps the raw
+  :class:`~fopy.finite.definability.DefinabilityResult` with pretty-printing,
+  LaTeX, proof sketches, and JSON certificates verifiable via
+  :func:`~fopy.finite.explain.verify_certificate`.
+
+  Attributes:
+      definable: ``True`` iff the target is definable in the requested fragment.
+      formula: Witness open formula when definable; ``None`` otherwise.
+      obstruction: Witness pair explanation when not definable; may be ``None``.
+      witness_tuples: Tuple lists serialised into negative certificates.
+  """
+```
+
+## Cross-references
+
+- Use Sphinx roles: ``:class:``, ``:func:``, ``:mod:``, ``:meth:`` with fully qualified paths (`fopy.finite.explain.ExplainReport`).
+- Link related ADRs in module docstrings when relevant (`docs/design/00N-….md`).
+
+## Doctests
+
+- Prefer **one** minimal `Examples:` block on entry-point functions (`explain_definability`, `parse_model`, `is_open_definable`, builders).
+- Keep doctests fast and deterministic (small fixtures, no `draw`/`z3` unless marked).
+
+## Build the manual locally
+
+```bash
+pip install -e ".[docs,draw]"
+mkdocs build --strict    # output: site/
+mkdocs serve             # preview at http://127.0.0.1:8000
+# or: ./scripts/build_docs.sh
+```
+
+CI runs `mkdocs build --strict` on every PR. See `.cursor/rules/docs-autogen.mdc`.
+Do not hand-maintain API prose in `docs/api/*.md` — only `::: module` stubs and short intros.
+
+## Clarity bar
+
+Docstrings must be **self-contained and very explanatory**: a reader of the generated API manual should understand purpose, theory-level intent, inputs, outputs, failure modes, and typical next steps **without opening the implementation**.
+
+- First line: what the symbol does for the user (not internal variable names).
+- Follow with **why it exists** and **how it relates** to the rest of fopy.
+- Every ``Args`` entry: type + semantics + valid values or constraints.
+- Every ``Returns`` entry: shape + interpretation (e.g. “empty list means valid everywhere”).
+- Document **Raises** whenever failure is non-obvious.
+- Entry points need a minimal ``Examples`` doctest when feasible.
+
+When editing existing docstrings, **expand** thin one-liners instead of leaving them.
+
+## Anti-patterns
+
+- No empty `""" """` or placeholder “TODO”.
+- No **shallow** docstrings that only repeat the identifier (`"""Parse model."""` on `parse_model`).
+- No narrating the obvious without context (`"""Return x."""` when the name is `get_x`).
+- No Spanish in docstrings (user docs / README may be Spanish).
+- Do not disable pydocstyle/ruff doc rules project-wide to skip documentation.

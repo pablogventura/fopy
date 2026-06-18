@@ -1,0 +1,61 @@
+---
+description: Auto-generated API docs must build cleanly and stay in sync with code
+alwaysApply: true
+---
+
+# Documentation autogeneration
+
+API documentation is **generated from docstrings** with **MkDocs + mkdocstrings**
+(Material theme). Human-written guides: `README.md` (Spanish), ADRs in `docs/design/`.
+
+**Single source of truth for API prose:** docstrings in `src/fopy/`.
+
+## Toolchain
+
+| Piece | Role |
+|-------|------|
+| `mkdocs.yml` | Site config, navigation, mkdocstrings handler |
+| `docs/api/*.md` | Stub pages (`::: fopy…`) — do **not** duplicate API text here |
+| `docs/design/*.md` | Architecture decision records (hand-written) |
+| `src/fopy/**/*.py` | Docstrings (Google style) → rendered HTML |
+
+## Commands
+
+```bash
+pip install -e ".[docs,draw]"   # draw optional but needed for fopy.draw imports
+./scripts/build_docs.sh          # writes site/
+mkdocs serve                     # local preview at :8000
+mkdocs build --strict            # CI gate — fails on broken refs / imports
+```
+
+## Keep docs always updated
+
+When you change **any** of the following in the same PR/commit:
+
+1. Public API surface (`__all__`, exports, new modules, signature changes)
+2. Docstrings or types on public symbols
+3. `mkdocs.yml` navigation or `docs/api/` stub structure
+4. Optional extras that affect importability (`draw`, `solvers`)
+
+you **must**:
+
+1. **Update docstrings** in `src/fopy/` (see `docstrings-manual.mdc`) — very explanatory.
+2. **Run** `mkdocs build --strict` locally and fix errors before finishing.
+3. **Add** a `docs/api/<subpackage>.md` stub if you introduce a new top-level subpackage worth its own nav entry.
+4. **Never** paste long API descriptions into `docs/api/*.md`; only `::: module` directives and short intros.
+
+CI runs the docs build on every push/PR; a red docs job blocks merge.
+
+## What not to do
+
+- Do not commit `site/` (build output; listed in `.gitignore`).
+- Do not hand-maintain duplicate API reference outside docstrings.
+- Do not merge code that breaks `mkdocs build --strict` expecting “docs later”.
+- Do not use `pdoc` or Sphinx in parallel — mkdocstrings is the canonical generator.
+
+## Agent checklist
+
+- [ ] Public change → docstrings updated in English, explanatory depth per rule
+- [ ] `mypy src/fopy` passes
+- [ ] `mkdocs build --strict` passes
+- [ ] New subpackage → nav + stub page if user-facing

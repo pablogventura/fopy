@@ -1,0 +1,92 @@
+---
+description: Type annotations on all public and internal API in src/fopy (mypy gate)
+alwaysApply: true
+---
+
+# Type annotations
+
+All Python in `src/fopy/` must be fully typed so `mypy src/fopy` passes with project settings in `pyproject.toml`.
+
+## Scope
+
+| Path | Policy |
+|------|--------|
+| `src/fopy/**/*.py` | **Required** — gated in CI |
+| `tests/` | Encouraged on helpers; not mypy-gated |
+| Scripts `scripts/` | Annotate `main() -> int \| None` and public helpers |
+
+## Required annotations
+
+Every function and method (including nested, `__init__`, properties):
+
+- Parameters: concrete types or `TypeVar` / `ParamSpec` when generic.
+- Return: explicit `-> T` (use `-> None` for procedures).
+- No bare `def f(x):` in `src/fopy/`.
+
+Module-level and class attributes that are part of the API should be typed (`__slots__` exempt).
+
+## Mypy settings (do not weaken)
+
+```toml
+# pyproject.toml [tool.mypy]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+no_implicit_optional = true
+check_untyped_defs = true
+warn_return_any = true
+strict_equality = true
+```
+
+Run before commit:
+
+```bash
+mypy src/fopy
+```
+
+## Style
+
+- Prefer `from __future__ import annotations` and modern syntax (`list[int]`, `X | Y`).
+- Use `collections.abc` (`Callable`, `Iterable`, `Mapping`) over bare `typing` aliases.
+- `TYPE_CHECKING` imports for cycles; never import only for runtime from heavy optional deps.
+- Prefer real types over `# type: ignore`; use `cast` only when narrowing is provably safe.
+- Avoid untyped `*args` / `**kwargs` in public API unless wrapping truly dynamic code.
+
+## Examples
+
+```python
+# ✅ GOOD
+def extension(
+    formula: Formula,
+    model: Model,
+    arity: int | None = None,
+) -> set[tuple[int, ...]]:
+    ...
+
+# ❌ BAD — missing return, implicit Optional
+def parse(path):
+    if path is None:
+        return None
+```
+
+```python
+# ✅ Overload only when signatures are disjoint for mypy
+@overload
+def load(path: str) -> Model: ...
+@overload
+def load(path: Path) -> Model: ...
+
+def load(path: str | Path) -> Model:
+    ...
+```
+
+## New code checklist
+
+1. All new/edited defs in `src/fopy/` have complete annotations.
+2. `mypy src/fopy` clean.
+3. If a public signature changes, update docstring `Args` / `Returns` (see `docstrings-manual.mdc`).
+
+## Anti-patterns
+
+- Widening `pyproject.toml` mypy overrides to silence errors without fixing types.
+- `Any` as a shortcut on internal logic (OK only at JSON / plugin boundaries).
+- Removing overloads incorrectly — if overloads overlap, fix signatures or use a single union return type.
