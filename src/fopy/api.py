@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import re
 
-from fopy.symbols import ConstantSymbol, FuncSymbol, RelSymbol, Variable, symbols
 from fopy.sorts import DEFAULT_SORT, Sort
+from fopy.symbols import FuncSymbol, RelSymbol, Variable, symbols
 
 
 def Vars(names: str, /, sort: Sort | str | None = None) -> Variable | tuple[Variable, ...]:

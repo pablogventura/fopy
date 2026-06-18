@@ -257,10 +257,13 @@ class Formula:
             case _:
                 if not vs:
                     return set()
+                from fopy.finite.eval_cache import EvalCache, satisfy_cached
+
+                cache = EvalCache()
                 result: set[tuple[int, ...]] = set()
                 for tuple_vals in _cartesian_product(model.universe, len(vs)):
                     vector = dict(zip(vs, tuple_vals, strict=True))
-                    if self.satisfy(model, vector):
+                    if satisfy_cached(self, model, vector, cache):
                         result.add(tuple(vector[v] for v in vs))
                 if a != len(vs):
                     return {t[:a] for t in result}

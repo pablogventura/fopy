@@ -61,9 +61,7 @@ def is_ep_definable(
     partition = TuplePartition.from_model(model, target.arity)
 
     def key(row: tuple[int, ...]) -> tuple[object, ...]:
-        return _ep_type_key(
-            model, row, max_depth=max_depth, max_existentials=max_existentials
-        )
+        return _ep_type_key(model, row, max_depth=max_depth, max_existentials=max_existentials)
 
     partition.refine(key)
     if partition.is_target_pure(target):

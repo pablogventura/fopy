@@ -110,10 +110,12 @@ select = [
 ignore = [
     "N815",   # SymPy-style is_Term / is_Formula flags on AST nodes
     "RUF001", # logic Unicode in strings (⊤, ∨, ×)
+    "RUF002", # logic Unicode in docstrings (⊤, ∨, ×)
     "RUF005", # list-literal concat style preference
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"src/fopy/api.py" = ["N802"]
 "tests/**" = ["PT011", "B017", "N806", "PT006", "PT018", "N802", "SIM105", "PLW0108", "RUF059", "E501"]
 "src/fopy/finite/open_formulas.py" = ["PT018"]
 

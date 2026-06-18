@@ -904,7 +904,7 @@ fopy/
 | Fragmento QF / open | soportado |
 | Cuantificadores en definibilidad | no (solo capa simbólica) |
 | Constelaciones / Minion | fuera de alcance |
-| `Theory.models_of_cardinality` | n ≤ 3, sin funciones |
+| `Theory.models_of_cardinality` | n ≤ 3, espacio acotado (funciones + relaciones) |
 | `homomorphisms` | universos ≤ 6 |
 | Enumeración HIT | puede ser lenta en álgebras grandes |
 | PyPI | no disponible aún |

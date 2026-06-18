@@ -17,9 +17,15 @@ from fopy.formulas import (
     Or,
     TrueF,
 )
+from fopy.sorts import DEFAULT_SORT, Sort
 from fopy.structures import Structure
 from fopy.symbols import Variable
 from fopy.terms import Apply, Constant, Term
+
+
+def sort_carrier(structure: Structure, sort: Sort | str = DEFAULT_SORT) -> list[Any]:
+    """Return the universe carrier for *sort* on *structure*."""
+    return structure.universe_for(sort)
 
 
 def evaluate(term: Term, structure: Structure, assignment: dict[Variable, Any]) -> Any:
@@ -89,7 +95,8 @@ def satisfy(
         return any(satisfy(c, structure, assignment) for c in formula.children)
     if isinstance(formula, ForAll):
         var = formula.var
-        for elem in structure.universe:
+        carrier = sort_carrier(structure, var.sort)
+        for elem in carrier:
             new_assign = dict(assignment)
             new_assign[var] = elem
             if not satisfy(formula.body, structure, new_assign):
@@ -97,7 +104,8 @@ def satisfy(
         return True
     if isinstance(formula, Exists):
         var = formula.var
-        for elem in structure.universe:
+        carrier = sort_carrier(structure, var.sort)
+        for elem in carrier:
             new_assign = dict(assignment)
             new_assign[var] = elem
             if satisfy(formula.body, structure, new_assign):
@@ -126,8 +134,9 @@ def extension(
     """
     if variables is None:
         variables = [Variable.from_index(i) for i in range(arity)]
+    carriers = [sort_carrier(structure, v.sort) for v in variables]
     result: set[tuple[Any, ...]] = set()
-    for tup in product(structure.universe, repeat=len(variables)):
+    for tup in product(*carriers):
         assign = dict(zip(variables, tup, strict=True))
         if satisfy(formula, structure, assign):
             result.add(tup)

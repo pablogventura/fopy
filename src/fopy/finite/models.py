@@ -8,12 +8,9 @@ from typing import TYPE_CHECKING
 from fopy.finite.relops import Operation, Relation
 
 if TYPE_CHECKING:
-    from fopy.finite.explain import ExplainReport
     from fopy.finite.open_formulas import Formula, Variable
     from fopy.formulas import Formula as SymbolicFormula
-    from fopy.structures import Structure
     from fopy.symbols import Variable as SymbolicVariable
-    from fopy.universal import Congruence
     from fopy.universal.lattice_views import CongruenceLattice, SubalgebraLattice
 
 

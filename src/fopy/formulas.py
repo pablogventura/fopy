@@ -117,6 +117,12 @@ class Formula(Basic):
 
         return to_tptp(self, name=name)
 
+    def to_tff(self, name: str = "conjecture") -> str:
+        """Export this formula as a TPTP ``tff`` conjecture (many-sorted)."""
+        from fopy.printing.tptp import to_tff
+
+        return to_tff(self, name=name)
+
     def to_smtlib(self) -> str:
         """Export this formula as an SMT-LIB ``(assert ...)`` fragment."""
         from fopy.printing.smtlib import to_smtlib
@@ -191,6 +197,14 @@ class Atom(Formula):
 
     __slots__ = ("_args", "rel")
 
+    def __new__(cls, rel: str, args: tuple[Term, ...]) -> Atom:
+        """Allocate or intern an atom node."""
+        from fopy.core.hashcons import hashcons_enabled, intern_basic
+
+        if hashcons_enabled():
+            return cast(Atom, intern_basic(cls, rel, args))
+        return cast(Atom, super().__new__(cls))
+
     def __init__(self, rel: str, args: tuple[Term, ...]) -> None:
         """Build an atom for relation *rel* applied to *args*."""
         super().__init__()
@@ -225,6 +239,14 @@ class Eq(Formula):
     """Equality formula ``left = right`` between terms."""
 
     __slots__ = ("left", "right")
+
+    def __new__(cls, left: Term, right: Term) -> Eq:
+        """Allocate or intern an equality node."""
+        from fopy.core.hashcons import hashcons_enabled, intern_basic
+
+        if hashcons_enabled():
+            return cast(Eq, intern_basic(cls, left, right))
+        return cast(Eq, super().__new__(cls))
 
     def __init__(self, left: Term, right: Term) -> None:
         """Build equality between *left* and *right*."""

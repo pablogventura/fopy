@@ -9,7 +9,8 @@ Guide for coding agents working in this repo. See [README.md](README.md) for use
 - **Optional**: `numpy`, `matplotlib` (`[draw]` extra)
 - **Dev**: `pytest`, `pytest-cov`, `ruff`, `mypy`, `hypothesis`
 - **Docs**: `mkdocs`, `mkdocs-material`, `mkdocstrings` (`[docs]` extra)
-- **CI**: GitHub Actions (`.github/workflows/ci.yml`) — tests + `mkdocs build --strict`
+- **Optional extras**: `[solvers]` (z3), `[viz]`, `[fast]` (numpy eval hooks), `[draw]` (matplotlib Hasse).
+- **CI**: GitHub Actions — `core`, `finite`, `solvers`, `viz`, `docs` jobs.
 - **Agent rules**: `.cursor/rules/static-analysis.mdc`, `.cursor/rules/docstrings-manual.mdc`, `.cursor/rules/type-annotations.mdc`, `.cursor/rules/docs-autogen.mdc`
 - **License**: MIT
 
@@ -59,7 +60,10 @@ Not detected: `make`, `tox`, Docker, migrations, build/publish to PyPI.
 | `src/fopy/builders/` | `Structure` builders (covers, Cayley, catalog B₂/M₃/N₅…) |
 | `src/fopy/parse/` | `parse_formula`, `parse_model` (`.model` format) |
 | `src/fopy/printing/` | `sstr`, `pprint`, `latex` |
-| `src/fopy/finite/` | Finite models, splitting, **HIT** open definability |
+| `src/fopy/finite/` | Finite models, HIT, **multi-fragment definability** (`fragments/`), `explain_definability` |
+| `src/fopy/finite/fragments/` | Bounded k-type checkers: `pp`, `ep`, `horn`, `fo` |
+| `src/fopy/solvers/` | Optional Z3 (`to_z3`, `prove_formula`, `check_sat_smt`) |
+| `src/fopy/universal/` | Congruences, subalgebras, `CongruenceLattice.draw()` |
 | `src/fopy/draw/` | Hasse layout (Freese/LatDraw-style), SVG render |
 | `tests/` | pytest suite; `tests/fixtures/*.model` for regression |
 | `docs/design/` | ADRs (HIT vs constellations, Hasse, builders) |
@@ -69,7 +73,9 @@ Not detected: `make`, `tox`, Docker, migrations, build/publish to PyPI.
 ## Architecture notes
 
 - **Two layers**: (1) symbolic `Structure` + FO formulas; (2) `fopy.finite.Model` for algorithms on integers/universe tables.
-- **Open definability**: use `fopy.finite.is_open_definable` (splitting + HIT). Do **not** port constellation/Minion from `definability`.
+- **Open definability**: `fopy.finite.check_definability` / `Definability.explain` — fragments `qf` (HIT), `pp`, `ep`, `horn`, `fo` (k-types, small `|U|`). Legacy alias: `is_open_definable` (= `qf`).
+- **Eval cache**: `fopy.finite.eval_cache.EvalCache` wired through `model_checking` and open-formula `extension`.
+- **Hash-cons**: `fopy.core.hashcons.enable_hashcons()` interns `Variable`, `Apply`, `Constant`, `Atom`, `Eq`.
 - **`.model` parser**: OpenDefAlgSplitting format; `eq(x,y)` not `==`.
 - **`draw`**: optional extra; keep core importable without numpy/matplotlib.
 
@@ -87,7 +93,7 @@ Not detected: `make`, `tox`, Docker, migrations, build/publish to PyPI.
 
 - Location: `tests/test_*.py`, shared fixtures in `tests/conftest.py`.
 - Run one file: `pytest tests/test_finite.py -q`
-- Markers: `@pytest.mark.draw`, `@pytest.mark.finite`, `@pytest.mark.slow` (reserved; CI excludes `slow`).
+- Markers: `@pytest.mark.draw`, `@pytest.mark.finite`, `@pytest.mark.solvers`, `@pytest.mark.viz`, `@pytest.mark.slow` (reserved; CI excludes `slow`).
 - **Do not** add tests that exhaustively run HIT, synthesis, homomorphism search, congruence/subalgebra enumeration, or full `.model` catalog batches. Those APIs are exponential or worse; test only on **tiny** curated fixtures (`|U| ≤ 4`) or unit-test structure without calling the heavy kernel.
 - **Coverage**: `fail_under = 85` for core (`pyproject.toml`; `omit`: `hit`, some `draw` internals). Finite job: **70%** on `fopy.finite` in CI.
 - Add regression `.model` fixtures under `tests/fixtures/` when touching `parse/model.py` or `finite/`.

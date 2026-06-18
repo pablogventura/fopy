@@ -42,3 +42,29 @@ def test_theory_consequence_reflexive():
     refl = fo.forall(x, leq(x, x))
     T = fo.Theory(sig, axioms=[refl])
     assert T.consequence(refl, 2)
+
+
+def test_theory_models_with_unary_function():
+    sig = fo.Signature(functions={"f": 1})
+    T = fo.Theory(sig, axioms=[])
+    models = list(T.models_of_cardinality(2))
+    assert len(models) == 4
+    assert all(len(m.universe) == 2 for m in models)
+
+
+def test_theory_models_function_axiom_identity():
+    x = fo.symbols("x")
+    sig = fo.Signature(functions={"f": 1})
+    f = fo.Function("f", 1)
+    identity = fo.forall(x, fo.eq(f(x), x))
+    T = fo.Theory(sig, axioms=[identity])
+    models = list(T.models_of_cardinality(2))
+    assert len(models) == 1
+
+
+def test_free_algebra_generators():
+    sig = fo.Signature(functions={"f": 1})
+    T = fo.Theory(sig, axioms=[])
+    F = T.free_algebra_generators(2, max_depth=2)
+    assert len(F.universe) >= 3
+    assert F.call_function("f", (0,)) in F.universe

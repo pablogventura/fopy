@@ -39,9 +39,10 @@ class TestDefinabilityResult:
 
     def test_check_alias(self, minimal_model):
         target = minimal_model.targets["T0"]
-        assert check_definability(minimal_model, target).definable == _iso(
-            minimal_model, target
-        ).definable
+        assert (
+            check_definability(minimal_model, target).definable
+            == _iso(minimal_model, target).definable
+        )
 
 
 @pytest.mark.finite

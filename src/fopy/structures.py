@@ -41,6 +41,7 @@ class Structure:
         functions: dict[str, dict[tuple[Any, ...], Any] | Any] | None = None,
         relations: Mapping[str, set[tuple[Any, ...]] | dict[tuple[Any, ...], bool]] | None = None,
         name: str = "",
+        universes: dict[str, list[Any]] | None = None,
     ) -> Structure:
         """Construct a structure from explicit function and relation tables.
 
@@ -50,6 +51,7 @@ class Structure:
             functions: Map from function symbols to Cayley tables or constant values.
             relations: Map from relation symbols to extension sets or truth tables.
             name: Optional human-readable structure name.
+            universes: Optional many-sorted carriers keyed by sort name.
 
         Returns:
             :class:`Structure` with the given tables.
@@ -93,7 +95,7 @@ class Structure:
 
                 rel_interp[sym] = make_rel()
 
-        return cls(signature, list(universe), fn_interp, rel_interp, name)
+        return cls(signature, list(universe), fn_interp, rel_interp, name, universes)
 
     def universe_for(self, sort: Sort | str = DEFAULT_SORT) -> list[Any]:
         """Return the carrier for *sort* (many-sorted lite).

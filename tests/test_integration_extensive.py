@@ -5,15 +5,15 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from helpers_finite import assert_formula_defines
 
 import fopy as fo
 from fopy.bridge import from_finite_model, to_finite_model
 from fopy.finite import explain_definability, is_open_definable, synthesize_defining_formula
 from fopy.finite.explain import format_open_formula, verify_certificate
-from fopy.finite.open_parse import parse_open_formula
 from fopy.finite.open_formulas import Variable
+from fopy.finite.open_parse import parse_open_formula
 from fopy.parse import parse_model
-from helpers_finite import assert_formula_defines
 
 MODELS = Path(__file__).resolve().parent / "fixtures" / "models"
 
@@ -32,7 +32,7 @@ class TestCrossModuleConsistency:
         m2 = to_finite_model(struct)
         t = minimal_model.targets["T0"]
         r1 = is_open_definable(minimal_model, t)
-        t2 = m2.targets.get("T0") or list(m2.targets.values())[0]
+        t2 = m2.targets.get("T0") or next(iter(m2.targets.values()))
         r2 = is_open_definable(m2, t2)
         assert r1.definable == r2.definable
 

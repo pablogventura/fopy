@@ -22,6 +22,91 @@ def _relation_powersets(universe: list[int], arity: int) -> list[frozenset[tuple
     return subsets
 
 
+_MAX_FUNCTION_TABLES = 4096
+_MAX_TOTAL_STRUCTURES = 65536
+
+
+def _function_table_domains(
+    universe: list[int],
+    arity: int,
+) -> list[dict[tuple[int, ...], int] | int]:
+    """Enumerate all function interpretations on *universe* for symbol arity *arity*."""
+    n = len(universe)
+    if arity == 0:
+        return list(universe)
+    inputs = list(product(universe, repeat=arity))
+    domain_size = len(inputs)
+    total = n**domain_size
+    if total > _MAX_FUNCTION_TABLES:
+        msg = (
+            f"Cannot enumerate arity-{arity} functions on |U|={n}: "
+            f"{total} tables exceed cap {_MAX_FUNCTION_TABLES}."
+        )
+        raise ValueError(msg)
+    tables: list[dict[tuple[int, ...], int]] = []
+    for code in range(total):
+        table: dict[tuple[int, ...], int] = {}
+        for idx, args in enumerate(inputs):
+            output_idx = (code // (n**idx)) % n
+            table[args] = universe[output_idx]
+        tables.append(table)
+    return cast(list[dict[tuple[int, ...], int] | int], tables)
+
+
+def _structure_domains(
+    signature: Signature,
+    universe: list[int],
+    *,
+    max_relations: int,
+) -> tuple[list[str], list[list[Any]], list[str], list[list[frozenset[tuple[int, ...]]]]]:
+    """Build Cartesian domains for function and relation symbols."""
+    fn_names = sorted(signature.functions)
+    rel_names = list(signature.relations.keys())
+    if len(rel_names) > max_relations:
+        raise ValueError("Too many relation symbols for brute-force enumeration")
+    fn_domains = [_function_table_domains(universe, signature.functions[name]) for name in fn_names]
+    rel_domains = [_relation_powersets(universe, signature.relations[name]) for name in rel_names]
+    total = 1
+    for domain in fn_domains + rel_domains:
+        total *= len(domain)
+    if total > _MAX_TOTAL_STRUCTURES:
+        msg = f"Cannot enumerate structures: {total} candidates exceed cap {_MAX_TOTAL_STRUCTURES}."
+        raise ValueError(msg)
+    return fn_names, fn_domains, rel_names, rel_domains
+
+
+def _iter_structures(
+    signature: Signature,
+    universe: list[int],
+    *,
+    max_relations: int = 2,
+) -> Iterator[Structure]:
+    """Yield every structure of size ``len(universe)`` matching *signature* tables."""
+    fn_names, fn_domains, rel_names, rel_domains = _structure_domains(
+        signature,
+        universe,
+        max_relations=max_relations,
+    )
+    fn_combos = product(*fn_domains) if fn_domains else [()]
+    rel_combos = product(*rel_domains) if rel_domains else [()]
+    for fn_combo in fn_combos:
+        functions = {name: fn_combo[i] for i, name in enumerate(fn_names)}
+        for rel_combo in rel_combos:
+            relations = {name: set(rel_combo[i]) for i, name in enumerate(rel_names)}
+            yield Structure.from_tables(
+                signature,
+                universe,
+                functions=cast(
+                    dict[str, dict[tuple[Any, ...], Any] | Any],
+                    functions,
+                ),
+                relations=cast(
+                    Mapping[str, set[tuple[Any, ...]] | dict[tuple[Any, ...], bool]],
+                    relations,
+                ),
+            )
+
+
 @dataclass
 class Variety:
     """Equational variety (closed first-order theory).
@@ -41,8 +126,9 @@ class Variety:
     def models_of_cardinality(self, n: int, *, max_relations: int = 2) -> Iterator[Structure]:
         """Brute-force generator of models of size ``n`` satisfying all axioms.
 
-        Only relation symbols with arity ≤ 2 are enumerated; intended for small
-        ``n`` (≤ 3).
+        Only relation symbols with arity ≤ 2 are enumerated; function symbols are
+        supported when the total search space stays below internal caps.
+        Intended for small ``n`` (≤ 3).
 
         Args:
             n: Universe cardinality.
@@ -52,34 +138,23 @@ class Variety:
             Structures of size ``n`` satisfying every axiom.
 
         Raises:
-            ValueError: If ``n > 3`` or too many relation symbols.
-            NotImplementedError: If function symbols are present.
+            ValueError: If ``n > 3``, too many relation symbols, or enumeration explodes.
         """
         if n < 1:
             return
         if n > 3:
             raise ValueError("models_of_cardinality supports n <= 3 only")
-        if self.signature.functions:
-            raise NotImplementedError("Enumeration with function symbols is not implemented")
-        if len(self.signature.relations) > max_relations:
-            raise ValueError("Too many relation symbols for brute-force enumeration")
 
         universe = list(range(n))
-        rel_names = list(self.signature.relations.keys())
-        domains = [
-            _relation_powersets(universe, self.signature.relations[name]) for name in rel_names
-        ]
-
-        for combo in product(*domains):
-            relations = {name: set(combo[i]) for i, name in enumerate(rel_names)}
-            structure = Structure.from_tables(
+        try:
+            structures = _iter_structures(
                 self.signature,
                 universe,
-                relations=cast(
-                    Mapping[str, set[tuple[Any, ...]] | dict[tuple[Any, ...], bool]],
-                    relations,
-                ),
+                max_relations=max_relations,
             )
+        except ValueError:
+            raise
+        for structure in structures:
             if all(satisfy(ax, structure, {}) for ax in self.axioms):
                 yield structure
 
@@ -125,30 +200,14 @@ class Variety:
             Counterexample structure, or ``None`` when all structures satisfy axioms.
 
         Raises:
-            ValueError: When ``n > 3``.
-            NotImplementedError: When function symbols prevent enumeration.
+            ValueError: When ``n > 3`` or enumeration explodes.
         """
         if n < 1:
             return None
         if n > 3:
             raise ValueError("finite_counterexample supports n <= 3 only")
-        if self.signature.functions:
-            raise NotImplementedError("Enumeration with function symbols is not implemented")
         universe = list(range(n))
-        rel_names = list(self.signature.relations.keys())
-        domains = [
-            _relation_powersets(universe, self.signature.relations[name]) for name in rel_names
-        ]
-        for combo in product(*domains):
-            relations = {name: set(combo[i]) for i, name in enumerate(rel_names)}
-            structure = Structure.from_tables(
-                self.signature,
-                universe,
-                relations=cast(
-                    Mapping[str, set[tuple[Any, ...]] | dict[tuple[Any, ...], bool]],
-                    relations,
-                ),
-            )
+        for structure in _iter_structures(self.signature, universe):
             if not all(satisfy(ax, structure, {}) for ax in self.axioms):
                 return structure
         return None
@@ -181,18 +240,31 @@ class Variety:
     def _axiom_set(self) -> frozenset[str]:
         return frozenset(repr(ax) for ax in self.axioms)
 
-    def free_algebra_generators(self, n: int) -> Structure:
-        """Compute the free algebra on ``n`` generators (not implemented).
+    def free_algebra_generators(self, n: int, *, max_depth: int = 2) -> Structure:
+        """Compute a bounded free term algebra on ``n`` generators.
+
+        Closes the signature under term formation up to *max_depth* and checks
+        that all variety axioms hold. Supports ``1 <= n <= 3`` and functional
+        signatures only.
 
         Args:
             n: Number of free generators.
+            max_depth: Maximum term depth when closing under operations.
+
+        Returns:
+            Structure whose universe is term indices ``0 .. |T|-1``.
 
         Raises:
-            NotImplementedError: Always; finite free algebras are future work.
+            ValueError: When parameters are out of bounds or axioms fail.
+            NotImplementedError: When relation symbols are present.
         """
-        raise NotImplementedError(
-            "free_algebra_generators is not implemented; "
-            "finite free algebras require term enumeration beyond current scope"
+        from fopy.theory_free_algebra import free_algebra_for_variety
+
+        return free_algebra_for_variety(
+            self.signature,
+            self.axioms,
+            n,
+            max_depth=max_depth,
         )
 
 

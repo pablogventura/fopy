@@ -667,4 +667,3 @@ def verify_certificate(cert: dict[str, Any], model: Model, target: Relation | st
     from fopy.finite.definability import is_open_definable
 
     return not is_open_definable(model, rel).definable
-

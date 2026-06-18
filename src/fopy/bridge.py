@@ -14,9 +14,9 @@ from fopy.structures import Structure
 
 
 def to_finite_model(structure: Structure, *, int_universe: bool = True) -> Model:
-    """Convert a symbolic :class:`~fopy.structures.Structure` to a finite :class:`~fopy.finite.models.Model`.
+    """Convert a symbolic :class:`~fopy.structures.Structure` to a finite model.
 
-    Operation and relation tables become integer-indexed
+    Builds a :class:`~fopy.finite.models.Model` from *structure*.
     :class:`~fopy.finite.relops.Operation` / :class:`~fopy.finite.relops.Relation`
     objects suitable for HIT and open-formula algorithms.
 
@@ -85,7 +85,7 @@ def to_finite_model(structure: Structure, *, int_universe: bool = True) -> Model
 
 
 def from_finite_model(model: Model, signature: Signature | None = None) -> Structure:
-    """Convert a finite :class:`~fopy.finite.models.Model` to a symbolic :class:`~fopy.structures.Structure`.
+    """Convert a finite :class:`~fopy.finite.models.Model` to a :class:`~fopy.structures.Structure`.
 
     Args:
         model: Finite algebra with integer universe and table-encoded ops.
@@ -122,6 +122,7 @@ def from_finite_model(model: Model, signature: Signature | None = None) -> Struc
         list(model.universe),
         functions=functions,
         relations=cast(Mapping[str, set[tuple[Any, ...]] | dict[tuple[Any, ...], bool]], relations),
+        universes={"U": list(model.universe)},
     )
 
 

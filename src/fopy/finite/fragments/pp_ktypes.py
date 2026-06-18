@@ -18,23 +18,23 @@ def is_pp_definable(
 ) -> DefinabilityResult:
     """Decide PP-definability using primitive-positive type refinement.
 
-    A relation is primitive-positive (PP) definable when it is a union of PP
-    types: equivalently, when the partition of all arity-tuples refined by
-    :func:`~fopy.finite.ktypes.atomic_pp_type` is *target-pure* (each block lies
-  entirely inside or outside the target).
+      A relation is primitive-positive (PP) definable when it is a union of PP
+      types: equivalently, when the partition of all arity-tuples refined by
+      :func:`~fopy.finite.ktypes.atomic_pp_type` is *target-pure* (each block lies
+    entirely inside or outside the target).
 
-    Args:
-        model: Finite algebra providing the signature.
-        target: Relation whose open PP definability is tested.
-        max_depth: Term depth bound passed to :func:`~fopy.finite.ktypes.atomic_pp_type`.
+      Args:
+          model: Finite algebra providing the signature.
+          target: Relation whose open PP definability is tested.
+          max_depth: Term depth bound passed to :func:`~fopy.finite.ktypes.atomic_pp_type`.
 
-    Returns:
-        :class:`~fopy.finite.definability.DefinabilityResult` with witness
-        formula when definable, or obstruction tuples when not.
+      Returns:
+          :class:`~fopy.finite.definability.DefinabilityResult` with witness
+          formula when definable, or obstruction tuples when not.
 
-    Raises:
-        ValueError: If tuple enumeration exceeds
-            :data:`~fopy.finite.fragments._partition.MAX_TUPLE_PARTITION`.
+      Raises:
+          ValueError: If tuple enumeration exceeds
+              :data:`~fopy.finite.fragments._partition.MAX_TUPLE_PARTITION`.
     """
     partition = TuplePartition.from_model(model, target.arity)
     partition.refine(lambda row: atomic_pp_type(model, row, max_depth=max_depth))

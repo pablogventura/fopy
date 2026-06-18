@@ -5,8 +5,14 @@ from __future__ import annotations
 import pytest
 
 from fopy.finite.explain import format_open_formula, latex_open_formula
-from fopy.finite.open_formulas import Variable, and_formula, eq, false_formula, neg, or_formula, true_formula
-from fopy.finite.open_formulas import Term
+from fopy.finite.open_formulas import (
+    Term,
+    Variable,
+    and_formula,
+    eq,
+    neg,
+    or_formula,
+)
 from fopy.finite.open_parse import parse_open_formula
 from fopy.printing.open import latex, sstr
 

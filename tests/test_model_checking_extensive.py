@@ -5,8 +5,7 @@ from __future__ import annotations
 import pytest
 
 from fopy.finite import counterexample, models, satisfying_assignments
-from fopy.finite.open_formulas import Variable, eq, false_formula, true_formula
-from fopy.finite.open_formulas import Term
+from fopy.finite.open_formulas import Term, Variable, eq, false_formula, true_formula
 from fopy.finite.open_parse import parse_open_formula
 
 

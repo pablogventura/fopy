@@ -118,3 +118,12 @@ def enumerate_tuples(model: Model, arity: int) -> list[tuple[int, ...]]:
         )
         raise ValueError(msg)
     return list(product(universe, repeat=arity))
+
+
+def enumerate_tuples_unbounded(model: Model, arity: int) -> list[tuple[int, ...]]:
+    """List every arity-tuple over ``model.universe`` without a size guard.
+
+    Used as a fallback when :func:`enumerate_tuples` refuses large products
+    (for example inside HIT on big universes).
+    """
+    return list(product(model.universe, repeat=arity))

@@ -21,8 +21,8 @@ def _horn_clause_candidates(
 ) -> list[Formula]:
     """Enumerate small Horn clauses ``(⋀ antecedent) → consequent`` as formulas.
 
-    Each atom is an equality between terms over the first *arity* variables.
-  The consequent is a single term equality; antecedents are bounded in length.
+      Each atom is an equality between terms over the first *arity* variables.
+    The consequent is a single term equality; antecedents are bounded in length.
     """
     terms = _enumerate_terms(arity, model.operations, max_depth)
     atoms = [eq(t1, t2) for t1 in terms for t2 in terms if str(t1) <= str(t2)]

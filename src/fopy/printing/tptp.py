@@ -16,6 +16,26 @@ def to_tptp(formula: Formula, name: str = "conjecture") -> str:
     return f"fof({name}, conjecture, {body})."
 
 
+def to_tff(formula: Formula, name: str = "conjecture") -> str:
+    """Export a formula as TPTP TFF with typed variables when sorts differ from ``U``."""
+    body = _formula_tptp(formula)
+    return f"tff({name}, conjecture, {body})."
+
+
+def uses_many_sorted(formula: Formula) -> bool:
+    """Return whether *formula* mentions a non-default variable sort."""
+    from fopy.transform import bound_vars, free_vars
+
+    return any(var.sort != DEFAULT_SORT for var in free_vars(formula) | bound_vars(formula))
+
+
+def to_tptp_auto(formula: Formula, name: str = "conjecture") -> str:
+    """Export as TFF when many-sorted, otherwise as fof."""
+    if uses_many_sorted(formula):
+        return to_tff(formula, name=name)
+    return to_tptp(formula, name=name)
+
+
 def _formula_tptp(f: Formula) -> str:
     if isinstance(f, TrueF):
         return "$true"

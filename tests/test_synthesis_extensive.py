@@ -5,13 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from helpers_finite import assert_formula_defines
 
 from fopy.finite import is_open_definable, synthesize_defining_formula
+from fopy.finite.open_formulas import Term, Variable, eq
 from fopy.finite.synthesis import SynthesisResult, _formula_max_term_depth
-from fopy.finite.open_formulas import Variable, eq
-from fopy.finite.open_formulas import Term
 from fopy.parse import parse_model
-from helpers_finite import assert_formula_defines
 
 MODELS = Path(__file__).resolve().parent / "fixtures" / "models"
 

@@ -51,7 +51,6 @@ def _instantiate(term: Term, args: list[Term]) -> Term:
     return _substitute_term(term, mapping)
 
 
-
 def _expand_unknown(term: Term, open_term: Term) -> Term:
     """Replace unknown-term marker nodes with *term* applied to sub-args."""
     from fopy.finite.open_formulas import TermKind
@@ -78,7 +77,8 @@ def _expand_formula_unknown(term: Term, formula: Formula) -> Formula:
     from fopy.finite.open_formulas import FormulaKind
 
     if formula.kind == FormulaKind.EQ:
-        assert formula.t1 is not None and formula.t2 is not None
+        assert formula.t1 is not None
+        assert formula.t2 is not None
         return eq(_expand_unknown(term, formula.t1), _expand_unknown(term, formula.t2))
     return formula
 
@@ -111,10 +111,7 @@ def find_term_identity(
     if arity == 0:
         arity = 3
     for term in _enumerate_terms(model, arity, max_depth):
-        if has_tau:
-            expanded = [_expand_formula_unknown(term, f) for f in equations]
-        else:
-            expanded = equations
+        expanded = [_expand_formula_unknown(term, f) for f in equations] if has_tau else equations
         if all(models(model, f) for f in expanded):
             return term
     return None
@@ -146,7 +143,7 @@ def is_malcev(model: Model, *, max_depth: int = 2) -> bool:
         ``True`` when a witness term is found.
     """
     x, y, z = Variable.from_index(0), Variable.from_index(1), Variable.from_index(2)
-    tx, ty, tz = Term.from_variable(x), Term.from_variable(y), Term.from_variable(z)
+    tx, ty, _tz = Term.from_variable(x), Term.from_variable(y), Term.from_variable(z)
 
     def equations(t: Term) -> list[Formula]:
         return [
@@ -171,7 +168,7 @@ def has_majority_term(model: Model, *, max_depth: int = 2) -> bool:
         ``True`` when a majority term is found within the bound.
     """
     x, y, z = Variable.from_index(0), Variable.from_index(1), Variable.from_index(2)
-    tx, ty, tz = Term.from_variable(x), Term.from_variable(y), Term.from_variable(z)
+    tx, ty, _tz = Term.from_variable(x), Term.from_variable(y), Term.from_variable(z)
 
     def equations(t: Term) -> list[Formula]:
         return [

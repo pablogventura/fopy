@@ -6,15 +6,15 @@ import pytest
 
 from fopy.finite.open_formulas import (
     FormulaKind,
+    Term,
+    TermKind,
     Variable,
     and_formula,
     eq,
-    false_formula,
     neg,
     or_formula,
     true_formula,
 )
-from fopy.finite.open_formulas import Term, TermKind
 from fopy.finite.open_parse import parse_open_formula, parse_term
 
 

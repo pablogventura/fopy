@@ -39,14 +39,15 @@ from fopy.printing import latex, pprint, sstr
 from fopy.semantics import evaluate, extension, satisfy
 from fopy.signature import Signature
 from fopy.simplify import and_formula, eq, false_formula, neg, or_formula, simplify, true_formula
+from fopy.sorts import DEFAULT_SORT, Sort
 from fopy.structures import Structure
 from fopy.symbols import ConstantSymbol, FuncSymbol, RelSymbol, Variable, symbols
 from fopy.terms import Apply, Constant, Term
-from fopy.sorts import DEFAULT_SORT, Sort
 from fopy.theories import Theory, Variety
-from fopy.transform import bound_vars, free_vars, rename_bound, subs, substitute, alpha_equivalent
+from fopy.transform import alpha_equivalent, bound_vars, free_vars, rename_bound, subs, substitute
 
 __all__ = [
+    "DEFAULT_SORT",
     "And",
     "Apply",
     "Atom",
@@ -55,10 +56,10 @@ __all__ = [
     "Eq",
     "Exists",
     "FalseF",
-    "Function",
     "ForAll",
     "Formula",
     "FuncSymbol",
+    "Function",
     "Not",
     "Or",
     "RelSymbol",
@@ -74,7 +75,6 @@ __all__ = [
     "Vars",
     "Visitor",
     "__version__",
-    "DEFAULT_SORT",
     "alpha_equivalent",
     "and_formula",
     "bound_vars",

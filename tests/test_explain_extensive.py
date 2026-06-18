@@ -245,9 +245,10 @@ class TestExplainDefinibilityIntegration:
         target = minimal_model.targets["T0"]
         from fopy.finite import is_open_definable
 
-        assert check_definability(minimal_model, target).definable == is_open_definable(
-            minimal_model, target
-        ).definable
+        assert (
+            check_definability(minimal_model, target).definable
+            == is_open_definable(minimal_model, target).definable
+        )
 
     def test_definable_formula_extension(self, minimal_model):
         report = explain_definability(minimal_model, "T0", max_synth_depth=0)

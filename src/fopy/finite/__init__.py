@@ -7,6 +7,7 @@ from fopy.finite.definability import (
     check_definability,
     is_open_definable,
 )
+from fopy.finite.eval_cache import EvalCache, satisfy_cached
 from fopy.finite.explain import (
     ExplainReport,
     Obstruction,
@@ -51,6 +52,7 @@ from fopy.finite.products import direct_product
 from fopy.finite.relops import Operation, Relation
 from fopy.finite.synthesis import (
     SynthesisResult,
+    formula_complexity,
     formula_max_term_depth,
     synthesize_defining_formula,
 )
@@ -63,6 +65,7 @@ __all__ = [
     "Counterexample",
     "Definability",
     "DefinabilityResult",
+    "EvalCache",
     "ExplainReport",
     "FiniteAlgebra",
     "Formula",
@@ -94,6 +97,7 @@ __all__ = [
     "extension",
     "false_formula",
     "format_open_formula",
+    "formula_complexity",
     "formula_max_term_depth",
     "information_gain_from_counts",
     "is_open_def",
@@ -106,6 +110,7 @@ __all__ = [
     "preprocesamiento2",
     "resolve_target",
     "satisfy",
+    "satisfy_cached",
     "satisfying_assignments",
     "serialize_certificate",
     "smt_synthesize",

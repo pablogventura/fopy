@@ -585,13 +585,6 @@ class Block:
         return self.generator.step()
 
 
-def _cartesian_product_sized(items: list[int], n: int) -> list[list[int]]:
-    result: list[list[int]] = [[]]
-    for _ in range(n):
-        result = [r + [item] for r in result for item in items]
-    return result
-
-
 def is_open_def(
     model: Model,
     targets: list[Relation],
@@ -613,11 +606,16 @@ def is_open_def(
     """
     cfg = config or HitConfig()
     arity = targets[0].arity
-    universe = model.universe
     mut_targets = targets
-    tuples = [
-        TupleHistory.new(list(t), mut_targets) for t in _cartesian_product_sized(universe, arity)
-    ]
+    try:
+        from fopy.finite.fragments._partition import enumerate_tuples
+
+        raw_tuples = enumerate_tuples(model, arity)
+    except ValueError:
+        from fopy.finite.fragments._partition import enumerate_tuples_unbounded
+
+        raw_tuples = enumerate_tuples_unbounded(model, arity)
+    tuples = [TupleHistory.new(list(t), mut_targets) for t in raw_tuples]
     tuples.sort(key=lambda th: th.t)
     operations: dict[int, list[Operation]] = {}
     for op in model.operations.values():

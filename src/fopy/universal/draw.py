@@ -24,7 +24,6 @@ def draw_congruence_lattice(model: Model, *, filename: str | None = None) -> obj
         ValueError: If the congruence lattice is empty.
         ImportError: If matplotlib is not installed.
     """
-    from collections.abc import Hashable
 
     from fopy.draw import draw_lattice
 
@@ -53,7 +52,6 @@ def draw_subalgebra_lattice(model: Model, *, filename: str | None = None) -> obj
         ValueError: If the subalgebra lattice is empty.
         ImportError: If matplotlib is not installed.
     """
-    from collections.abc import Hashable
 
     from fopy.draw import draw_lattice
 

@@ -377,10 +377,7 @@ def is_isomorphic(left: Model, right: Model) -> bool:
             return False
     maps = homomorphisms(left, right)
     n = len(left.universe)
-    for m in maps:
-        if len(set(m.values())) == n and len(m) == n:
-            return True
-    return False
+    return any(len(set(m.values())) == n and len(m) == n for m in maps)
 
 
 def is_embedding(model: Model, target: Model) -> bool:
@@ -394,10 +391,7 @@ def is_embedding(model: Model, target: Model) -> bool:
         ``True`` when an injective homomorphism ``model -> target`` exists.
     """
     maps = homomorphisms(model, target)
-    for m in maps:
-        if len(set(m.values())) == len(model.universe):
-            return True
-    return False
+    return any(len(set(m.values())) == len(model.universe) for m in maps)
 
 
 def subalgebra_lattice(model: Model) -> SubalgebraLattice:

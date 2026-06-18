@@ -99,7 +99,7 @@ def synthesize_defining_formula(
     """
     goal = _target_extension(model, target)
     best: Formula | None = None
-    best_depth = max_depth + 1
+    best_score = (max_depth + 1, max_depth + 1)
     seen_extensions: set[frozenset[tuple[int, ...]]] = set()
     for depth in range(max_depth + 1):
         for f in _enumerate_eq_formulas(model, target.arity, depth):
@@ -109,16 +109,16 @@ def synthesize_defining_formula(
                 continue
             seen_extensions.add(ext_key)
             if ext == goal:
-                if f.kind == FormulaKind.EQ and f.t1 is not None and f.t2 is not None:
-                    d = max(f.t1.grade(), f.t2.grade())
-                else:
-                    d = 0
-                if d < best_depth:
+                score = formula_complexity(f)
+                if score < best_score:
                     best = f
-                    best_depth = d
+                    best_score = score
         if best is not None:
             return SynthesisResult(
-                formula=best, minimal=True, min_term_depth=best_depth, exhausted=True
+                formula=best,
+                minimal=True,
+                min_term_depth=best_score[0],
+                exhausted=True,
             )
     hit = is_open_definable(model, target)
     if hit.definable and hit.formula is not None:
@@ -132,6 +132,24 @@ def synthesize_defining_formula(
 def formula_max_term_depth(formula: Formula) -> int:
     """Return the maximum term grade appearing in an open formula."""
     return _formula_max_term_depth(formula)
+
+
+def formula_complexity(formula: Formula) -> tuple[int, int]:
+    """Return ``(max_term_depth, ast_node_count)`` for ranking witnesses."""
+    return (_formula_max_term_depth(formula), _formula_ast_size(formula))
+
+
+def _formula_ast_size(formula: Formula) -> int:
+    match formula.kind:
+        case FormulaKind.EQ:
+            return 1
+        case FormulaKind.NEG:
+            assert formula.inner is not None
+            return 1 + _formula_ast_size(formula.inner)
+        case FormulaKind.AND | FormulaKind.OR:
+            return 1 + sum(_formula_ast_size(p) for p in formula.parts)
+        case _:
+            return 1
 
 
 def _formula_max_term_depth(formula: Formula) -> int:
