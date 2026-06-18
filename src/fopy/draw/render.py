@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Hashable, Sequence
 from pathlib import Path
-from typing import Hashable, Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.figure import Figure
 
 
 def _label(element: Hashable) -> str:
@@ -57,7 +58,7 @@ def draw_diagram(
         x, y = positions_2d[i]
         circle = plt.Circle((x, y), node_radius, facecolor="#4c78a8", edgecolor="#1f2d3d", zorder=2)
         ax.add_patch(circle)
-        text = labels.get(element) if labels else _label(element)
+        text = labels.get(element, _label(element)) if labels else _label(element)
         ax.text(x, y, text, ha="center", va="center", color="white", fontsize=9, zorder=3)
 
     pad = 0.6
@@ -80,8 +81,10 @@ def save_figure(
     path = Path(filename)
     path.parent.mkdir(parents=True, exist_ok=True)
     fmt = path.suffix.lstrip(".").lower() or "svg"
-    ax.figure.savefig(path, format=fmt, bbox_inches="tight", dpi=dpi)
-    plt.close(ax.figure)
+    fig = ax.figure
+    assert isinstance(fig, Figure)
+    fig.savefig(path, format=fmt, bbox_inches="tight", dpi=dpi)
+    plt.close(fig)
     return path
 
 

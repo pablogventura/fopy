@@ -18,9 +18,49 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install
         run: pip install -e ".[dev,draw]"
-      - name: Ruff
+      - name: Ruff lint
         run: ruff check src tests
+      - name: Ruff format
+        run: ruff format --check src tests
+      - name: Mypy
+        run: mypy src/fopy
       - name: Pytest core
         run: pytest tests/ -m "not slow and not finite" --cov=fopy --cov-report=term-missing --cov-fail-under=85
       - name: Pytest finite
-        run: pytest tests/ -m "finite" --cov=fopy.finite --cov-report=term-missing --cov-fail-under=70
+        run: pytest tests/ -m "finite and not slow" --cov=fopy.finite --cov-report=term-missing --cov-fail-under=70
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[docs,draw]"
+      - name: Build documentation
+        run: mkdocs build --strict
+
+  solvers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev,solvers]"
+      - name: Pytest solvers
+        run: pytest tests/ -m solvers -q
+
+  viz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev,draw]"
+      - name: Pytest viz exports
+        run: pytest tests/test_viz_exports.py -q

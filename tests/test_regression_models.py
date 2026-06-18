@@ -41,4 +41,3 @@ def test_fixture_parse_errors(name: str):
     path = MODELS / name if (MODELS / name).exists() else FIXTURES / name
     with pytest.raises((ValueError, Exception)):
         parse_model(path, preprocess=False)
-

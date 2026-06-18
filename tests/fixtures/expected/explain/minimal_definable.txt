@@ -1,0 +1,5 @@
+Relation T0 is definable in fragment qf (quantifier-free).
+
+A defining formula is:
+
+    true

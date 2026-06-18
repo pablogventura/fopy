@@ -14,11 +14,13 @@ from fopy.finite.relops import Operation
 
 def test_term_str_and_grade():
     x = Variable.new("x")
-    t = Term.variable(x)
+    t = Term.from_variable(x)
     assert t.grade() == 0
     op = Operation.new("f", 2)
     op.add([0, 0, 0])
-    t2 = Term.op_term(__import__("fopy.finite.open_formulas", fromlist=["OpSym"]).OpSym.new("f", 2), [t, t])
+    t2 = Term.op_term(
+        __import__("fopy.finite.open_formulas", fromlist=["OpSym"]).OpSym.new("f", 2), [t, t]
+    )
     assert t2.grade() == 1
 
 
@@ -33,8 +35,8 @@ def test_formula_true_false():
 def test_formula_neg_double():
     x = Variable.new("x")
     y = Variable.new("y")
-    t1 = Term.variable(x)
-    t2 = Term.variable(y)
+    t1 = Term.from_variable(x)
+    t2 = Term.from_variable(y)
     from fopy.finite.open_formulas import eq
 
     inner = eq(t1, t2)
@@ -44,7 +46,7 @@ def test_formula_neg_double():
 
 def test_and_or_merge():
     x = Variable.new("x")
-    t = Term.variable(x)
+    t = Term.from_variable(x)
     from fopy.finite.open_formulas import eq
 
     a = eq(t, t)

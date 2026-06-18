@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import fopy as fo
 from hypothesis import given, settings
 from hypothesis import strategies as st
+
+import fopy as fo
 
 
 @given(st.integers(min_value=2, max_value=8))

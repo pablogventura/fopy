@@ -8,6 +8,7 @@ from fopy.draw import boolean_lattice, chain, draw_lattice, m3, n5
 
 
 def main() -> None:
+    """Render standard example Hasse diagrams into ``out/`` as SVG files."""
     out = Path("out")
     out.mkdir(parents=True, exist_ok=True)
 

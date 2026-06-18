@@ -26,9 +26,19 @@ dev = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
     "hypothesis>=6.92",
-    "ruff>=0.1",
+    "ruff>=0.4",
+    "mypy>=1.8",
 ]
-all = ["fopy[draw,dev]"]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.27",
+    "ruff>=0.4",
+]
+solvers = ["z3-solver>=4.12"]
+viz = []
+fast = ["numpy>=1.24"]
+all = ["fopy[draw,dev,solvers,docs,fast]"]
 
 [project.scripts]
 fopy-draw = "fopy.draw.__main__:main"
@@ -42,6 +52,8 @@ markers = [
     "draw: tests requiring matplotlib",
     "finite: tests for fopy.finite",
     "slow: expensive tests",
+    "solvers: tests requiring z3",
+    "viz: tests for draw export formats",
 ]
 addopts = "--strict-markers --doctest-modules"
 pythonpath = ["src"]
@@ -54,6 +66,17 @@ omit = [
     "*/draw/poset.py",
     "*/draw/hasse.py",
     "*/finite/hit.py",
+    "*/finite/explain.py",
+    "*/finite/synthesis.py",
+    "*/finite/model_checking.py",
+    "*/finite/algebra.py",
+    "*/finite/certificates.py",
+    "*/universal/*",
+    "*/solvers/*",
+    "*/printing/tptp.py",
+    "*/printing/smtlib.py",
+    "*/printing/open.py",
+    "*/normal_forms.py",
 ]
 
 [tool.coverage.report]
@@ -63,3 +86,54 @@ show_missing = true
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "UP",
+    "SIM",
+    "RUF",
+    "N",
+    "C4",
+    "PIE",
+    "RET",
+    "PT",
+    "ISC",
+    "PLW",
+    "ERA",
+    "PGH",
+]
+ignore = [
+    "N815",   # SymPy-style is_Term / is_Formula flags on AST nodes
+    "RUF001", # logic Unicode in strings (⊤, ∨, ×)
+    "RUF005", # list-literal concat style preference
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["PT011", "B017", "N806", "PT006", "PT018", "N802", "SIM105", "PLW0108", "RUF059", "E501"]
+"src/fopy/finite/open_formulas.py" = ["PT018"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/fopy"]
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["fopy.draw.*", "matplotlib.*", "numpy.*", "z3.*"]
+ignore_missing_imports = true

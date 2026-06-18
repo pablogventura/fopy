@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 def boolean_lattice(n: int) -> tuple[list[int], Callable[[int, int], bool]]:
@@ -13,6 +14,8 @@ def boolean_lattice(n: int) -> tuple[list[int], Callable[[int, int], bool]]:
     elements = list(range(size))
 
     def leq(a: int, b: int) -> bool:
+        """Return whether bitmask ``a`` is below ``b`` in subset order."""
+
         return (a & b) == a
 
     return elements, leq

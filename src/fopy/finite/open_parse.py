@@ -48,9 +48,22 @@ def parse_term(
     vars_map: dict[str, Variable],
     operations: dict[str, Operation],
 ) -> Term:
+    """Parse an open term string using *vars_map* and *operations*.
+
+    Args:
+        s: Source text (variable name or ``op(arg1, ...)``).
+        vars_map: Maps variable symbols to :class:`~fopy.finite.open_formulas.Variable`.
+        operations: Available operations (used for arity validation context).
+
+    Returns:
+        Parsed :class:`~fopy.finite.open_formulas.Term`.
+
+    Raises:
+        ValueError: If *s* is not a known variable or operation application.
+    """
     s = s.strip()
     if s in vars_map:
-        return Term.variable(vars_map[s])
+        return Term.from_variable(vars_map[s])
     if "(" in s:
         lp = s.index("(")
         name = s[:lp]
@@ -59,11 +72,28 @@ def parse_term(
         return Term.op_term(OpSym.new(name, len(args)), args)
     raise ValueError(f"Unknown term: {s}")
 
+
 def parse_open_formula(
     s: str,
     vars_map: dict[str, Variable],
     operations: dict[str, Operation],
 ) -> Formula:
+    """Parse an open quantifier-free formula over term equality.
+
+    Supports ``&``, ``|``, unary ``-`` (negation), ``true``, ``false``, and
+    ``eq(t1, t2)`` atoms.
+
+    Args:
+        s: Source text.
+        vars_map: Variable symbol table.
+        operations: Operation signature for term parsing.
+
+    Returns:
+        Parsed :class:`~fopy.finite.open_formulas.Formula`.
+
+    Raises:
+        ValueError: If *s* cannot be parsed.
+    """
     s = s.strip()
     idx = _find_top_level(s, "|")
     if idx is not None:
@@ -79,6 +109,14 @@ def parse_open_formula(
         )
     if s.startswith("-"):
         return neg(parse_open_formula(s[1:], vars_map, operations))
+    if s == "true":
+        from fopy.finite.open_formulas import true_formula
+
+        return true_formula(None)
+    if s == "false":
+        from fopy.finite.open_formulas import false_formula
+
+        return false_formula(None)
     if s.startswith("eq("):
         inner = s[3:-1]
         comma = _find_top_level(inner, ",") or inner.index(",")

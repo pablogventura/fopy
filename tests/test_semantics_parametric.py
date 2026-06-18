@@ -25,7 +25,9 @@ def test_chain_reflexive(n: int, leq_sym):
 def test_chain_transitive(n: int, leq_sym):
     s = fo.builders.chain(n)
     x, y, z = fo.symbols("x y z")
-    trans = fo.forall(x, fo.forall(y, fo.forall(z, (leq_sym(x, y) & leq_sym(y, z)) >> leq_sym(x, z))))
+    trans = fo.forall(
+        x, fo.forall(y, fo.forall(z, (leq_sym(x, y) & leq_sym(y, z)) >> leq_sym(x, z)))
+    )
     assert satisfy(trans, s, {})
 
 

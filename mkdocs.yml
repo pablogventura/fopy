@@ -1,0 +1,74 @@
+site_name: fopy
+site_description: Symbolic first-order logic and open definability for Python
+site_url: https://fopy.readthedocs.io/
+repo_url: https://github.com/pabloventura/fopy
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - search.suggest
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_root_heading: true
+            show_source: false
+            show_signature_annotations: true
+            separate_signature: true
+            merge_init_into_class: true
+            members_order: source
+            docstring_section_style: spacy
+            show_if_no_docstring: false
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - admonition
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - API:
+      - Overview: api/index.md
+      - fopy.finite: api/finite.md
+      - Definability fragments: api/fragments.md
+      - fopy.builders: api/builders.md
+      - fopy.draw: api/draw.md
+      - fopy.universal: api/universal.md
+      - Varieties: api/variety.md
+      - Solvers (Z3): api/solvers.md
+  - Design:
+      - HIT definability: design/001-hit-definability.md
+      - Hasse layout: design/002-hasse-layout.md
+      - Builders: design/003-builders.md
+      - Substitution: design/004-substitution.md
+      - Explain definability: design/004-explain-definability.md
+      - Forces: design/005-forces.md
+      - Equality: design/006-equality.md
+      - Complexity bounds: design/007-complexity-bounds.md
+      - Many-sorted lite: design/008-many-sorted.md
+      - Fragments: design/009-fragments.md
+      - FO k-types: design/010-fo-definability-k-types.md

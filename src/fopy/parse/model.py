@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import gzip
 import re
+from contextlib import AbstractContextManager
 from pathlib import Path
+from typing import TextIO
 
 from fopy.finite.models import Model
 from fopy.finite.open_formulas import Variable, extension
@@ -14,7 +16,16 @@ from fopy.finite.relops import Operation, Relation
 
 
 class ParseError(Exception):
+    """Error raised while parsing a ``.model`` file."""
+
     def __init__(self, line: int, message: str, path: str | None = None) -> None:
+        """Initialize a parse error at *line* with *message*.
+
+        Args:
+            line: 1-based line number where parsing failed.
+            message: Human-readable error description.
+            path: Optional source file path.
+        """
         self.line = line
         self.path = path
         self.message = message
@@ -27,13 +38,27 @@ def _clean_line(line: str) -> str:
     return line.strip()
 
 
+def _open_model_file(path_obj: Path) -> AbstractContextManager[TextIO]:
+    if str(path_obj).endswith(".gz"):
+        return gzip.open(path_obj, "rt")
+    return open(path_obj, encoding="utf-8")
+
+
 def parse_model(path: str | Path | None = None, preprocess: bool = True) -> Model:
+    """Parse a finite model from an OpenDefAlgSplitting ``.model`` file.
+
+    Args:
+        path: Path to the ``.model`` file (``.gz`` supported).
+        preprocess: If ``True``, split target relations whose names start with ``T``.
+
+    Returns:
+        Parsed :class:`~fopy.finite.models.Model`.
+
+    Raises:
+        ParseError: If *path* is missing, the universe is undefined, or a line is invalid.
+    """
     path_obj = Path(path) if path else None
-    if path_obj and str(path_obj).endswith(".gz"):
-        f = gzip.open(path_obj, "rt")
-    elif path_obj:
-        f = open(path_obj, encoding="utf-8")
-    else:
+    if not path_obj:
         raise ParseError(0, "path required")
 
     universe: list[int] | None = None
@@ -44,7 +69,7 @@ def parse_model(path: str | Path | None = None, preprocess: bool = True) -> Mode
     current_op: tuple[Operation, int] | None = None
     line_no = 0
 
-    with f:
+    with _open_model_file(path_obj) as f:
         for raw in f:
             line_no += 1
             line = _clean_line(raw)

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from itertools import product
-from typing import Any
+from typing import Any, cast
 
 from fopy.formulas import (
     And,
@@ -11,8 +11,8 @@ from fopy.formulas import (
     Eq,
     Exists,
     FalseF,
-    Formula,
     ForAll,
+    Formula,
     Not,
     Or,
     TrueF,
@@ -23,6 +23,20 @@ from fopy.terms import Apply, Constant, Term
 
 
 def evaluate(term: Term, structure: Structure, assignment: dict[Variable, Any]) -> Any:
+    """Evaluate a term in a structure under a variable assignment.
+
+    Args:
+        term: Term to evaluate.
+        structure: Structure providing function interpretations.
+        assignment: Map from variables to universe elements.
+
+    Returns:
+        The value of *term* in *structure* under *assignment*.
+
+    Raises:
+        ValueError: If a variable in *term* is not bound in *assignment*.
+        TypeError: If *term* is not a supported term node.
+    """
     if isinstance(term, Variable):
         if term not in assignment:
             raise ValueError(f"Unbound variable {term}")
@@ -30,12 +44,29 @@ def evaluate(term: Term, structure: Structure, assignment: dict[Variable, Any]) 
     if isinstance(term, Constant):
         return structure.call_function(term.name, ())
     if isinstance(term, Apply):
-        args = tuple(evaluate(a, structure, assignment) for a in term._args)
+        args = tuple(evaluate(cast(Term, a), structure, assignment) for a in term._args)
         return structure.call_function(term.func, args)
     raise TypeError(type(term))
 
 
-def satisfy(formula: Formula, structure: Structure, assignment: dict[Variable, Any] | None = None) -> bool:
+def satisfy(
+    formula: Formula,
+    structure: Structure,
+    assignment: dict[Variable, Any] | None = None,
+) -> bool:
+    """Decide whether a formula holds in a structure under an assignment.
+
+    Args:
+        formula: Formula to test.
+        structure: Structure providing universe and interpretations.
+        assignment: Optional map from free variables to universe elements.
+
+    Returns:
+        ``True`` if *formula* is satisfied, ``False`` otherwise.
+
+    Raises:
+        TypeError: If *formula* is not a supported formula node.
+    """
     assignment = dict(assignment or {})
 
     if isinstance(formula, TrueF):
@@ -44,10 +75,11 @@ def satisfy(formula: Formula, structure: Structure, assignment: dict[Variable, A
         return False
     if isinstance(formula, Atom):
         args = tuple(evaluate(a, structure, assignment) for a in formula._args)
-        return structure.call_relation(formula.rel, args)
+        return bool(structure.call_relation(formula.rel, args))
     if isinstance(formula, Eq):
-        return evaluate(formula.left, structure, assignment) == evaluate(
-            formula.right, structure, assignment
+        return bool(
+            evaluate(formula.left, structure, assignment)
+            == evaluate(formula.right, structure, assignment)
         )
     if isinstance(formula, Not):
         return not satisfy(formula.arg, structure, assignment)
@@ -80,12 +112,23 @@ def extension(
     arity: int,
     variables: list[Variable] | None = None,
 ) -> set[tuple[Any, ...]]:
-    """Extensional relation of a quantifier-free formula."""
+    """Compute the extension of a quantifier-free formula as a relation.
+
+    Args:
+        formula: Quantifier-free formula over *variables*.
+        structure: Structure used for evaluation.
+        arity: Number of free variables when *variables* is omitted.
+        variables: Optional ordered list of free variables; defaults to
+            ``Variable.from_index(0)``, …, ``Variable.from_index(arity - 1)``.
+
+    Returns:
+        Set of variable assignments (as tuples) on which *formula* holds.
+    """
     if variables is None:
         variables = [Variable.from_index(i) for i in range(arity)]
     result: set[tuple[Any, ...]] = set()
     for tup in product(structure.universe, repeat=len(variables)):
-        assign = dict(zip(variables, tup))
+        assign = dict(zip(variables, tup, strict=True))
         if satisfy(formula, structure, assign):
             result.add(tup)
     return result

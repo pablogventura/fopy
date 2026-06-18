@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from fopy.formulas import And, Atom, Eq, Exists, FalseF, ForAll, Formula, Not, Or, TrueF
 from fopy.symbols import Variable
 from fopy.terms import Apply, Constant, Term
@@ -22,7 +24,7 @@ def _term_latex(t: Term) -> str:
     if isinstance(t, Constant):
         return f"\\mathrm{{{t.name}}}"
     if isinstance(t, Apply):
-        args = ", ".join(_term_latex(a) for a in t._args)
+        args = ", ".join(_term_latex(cast(Term, a)) for a in t._args)
         return f"\\mathrm{{{t.func}}}({args})"
     return repr(t)
 

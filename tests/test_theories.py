@@ -23,7 +23,9 @@ def test_theory_models_of_cardinality():
     sig = fo.Signature(relations={"leq": 2})
     T = fo.Theory(sig, axioms=[])
     models = list(T.models_of_cardinality(2))
-    assert len(models) == 2 ** 4  # two binary relations on 2 elements... wait one relation arity 2 on 2 el = 2^4 subsets
+    assert (
+        len(models) == 2**4
+    )  # two binary relations on 2 elements... wait one relation arity 2 on 2 el = 2^4 subsets
     assert all(len(m.universe) == 2 for m in models)
 
 

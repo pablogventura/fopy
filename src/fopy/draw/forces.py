@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import numpy as np
 
 from fopy.draw.poset import comparable
@@ -121,4 +123,4 @@ def simulate_forces(
         pos = pos + dt * vel
         pos, vel = _sanitize(pos, vel)
 
-    return pos
+    return cast("np.ndarray", pos)

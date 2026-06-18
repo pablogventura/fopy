@@ -26,7 +26,9 @@ def test_from_finite_model_with_targets():
     op.add([0, 0, 0])
     rel = Relation.new("T0", 1)
     rel.add([0])
-    m = Model.new([0, 1], operations={"f": op}, relations={"leq": Relation.new("leq", 2)}, targets={"T0": rel})
+    m = Model.new(
+        [0, 1], operations={"f": op}, relations={"leq": Relation.new("leq", 2)}, targets={"T0": rel}
+    )
     sig = fo.Signature(functions={"f": 2}, relations={"leq": 2})
     s = fo.from_finite_model(m, sig)
     assert len(s.universe) == 2

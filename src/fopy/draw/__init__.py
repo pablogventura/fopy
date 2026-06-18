@@ -5,8 +5,9 @@ from __future__ import annotations
 from collections.abc import Callable, Hashable, Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from fopy.draw.examples import boolean_lattice, chain, m3, n5
@@ -92,7 +93,7 @@ def draw_structure(
     seed: int = 42,
     filename: str | Path | None = None,
     labels: dict[Hashable, str] | None = None,
-):
+) -> plt.Axes | Path:
     """Draw Hasse diagram from a :class:`fopy.structures.Structure`."""
     from fopy.structures import Structure
 
@@ -106,10 +107,14 @@ def draw_structure(
         leq_set = rel_data
 
         def leq(a: Hashable, b: Hashable) -> bool:
+            """Test order using the precomputed relation set."""
+
             return (a, b) in leq_set
     else:
 
         def leq(a: Hashable, b: Hashable) -> bool:
+            """Test order via :meth:`~fopy.structures.Structure.call_relation`."""
+
             return bool(structure.call_relation(relation, (a, b)))
 
     return draw_lattice(universe, leq=leq, seed=seed, filename=filename, labels=labels)
@@ -123,7 +128,7 @@ def draw_lattice(
     seed: int = 42,
     filename: str | Path | None = None,
     labels: dict[Hashable, str] | None = None,
-):
+) -> plt.Axes | Path:
     """
     Layout and render a Hasse diagram.
 
@@ -133,10 +138,10 @@ def draw_lattice(
     if isinstance(elements, tuple) and len(elements) == 2:
         elems, rel = elements
         if callable(rel):
-            leq = rel
+            leq = cast(Callable[[Hashable, Hashable], bool], rel)
         else:
-            covers = rel
-        elements = elems
+            covers = cast(Iterable[tuple[Hashable, Hashable]], rel)
+        elements = cast(Sequence[Hashable], elems)
 
     layout = layout_lattice(elements, leq=leq, covers=covers, seed=seed)
     return render_lattice(

@@ -21,9 +21,10 @@ def test_hit_config_defaults():
 
 
 def test_is_open_def_direct():
+    from pathlib import Path
+
     from fopy.finite.preprocessing import split_targets
     from fopy.parse import parse_model
-    from pathlib import Path
 
     path = Path(__file__).resolve().parent / "fixtures" / "minimal.model"
     model = parse_model(path, preprocess=True)
@@ -50,11 +51,10 @@ def test_relops_restrict():
 
 
 def test_open_formula_extension(minimal_model):
-    from fopy.finite.open_formulas import Variable, eq
-    from fopy.finite.open_formulas import Term
+    from fopy.finite.open_formulas import Term, Variable, eq
 
     x = Variable.new("x")
-    t = Term.variable(x)
+    t = Term.from_variable(x)
     f = eq(t, t)
     ext = f.extension(minimal_model, 1)
     assert ext

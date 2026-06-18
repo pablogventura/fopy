@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from fopy.signature import Signature
+from fopy.sorts import DEFAULT_SORT, Sort
 
-
-Interpretation = Callable[..., Any] | dict[tuple[Any, ...], Any]
+Interpretation = Callable[..., Any] | dict[tuple[Any, ...], Any] | set[tuple[Any, ...]]
 
 
 @dataclass
@@ -20,6 +21,7 @@ class Structure:
     functions: dict[str, Interpretation] = field(default_factory=dict)
     relations: dict[str, Interpretation] = field(default_factory=dict)
     name: str = ""
+    universes: dict[str, list[Any]] | None = None
 
     def __post_init__(self) -> None:
         for f, arity in self.signature.functions.items():
@@ -27,7 +29,7 @@ class Structure:
                 raise ValueError(f"Missing interpretation for function {f}")
             if arity == 0:
                 continue
-        for r, arity in self.signature.relations.items():
+        for r, _arity in self.signature.relations.items():
             if r not in self.relations:
                 raise ValueError(f"Missing interpretation for relation {r}")
 
@@ -37,20 +39,35 @@ class Structure:
         signature: Signature,
         universe: list[Any],
         functions: dict[str, dict[tuple[Any, ...], Any] | Any] | None = None,
-        relations: dict[str, set[tuple[Any, ...]] | dict[tuple[Any, ...], bool]] | None = None,
+        relations: Mapping[str, set[tuple[Any, ...]] | dict[tuple[Any, ...], bool]] | None = None,
         name: str = "",
     ) -> Structure:
+        """Construct a structure from explicit function and relation tables.
+
+        Args:
+            signature: Language signature for the structure.
+            universe: Ordered list of universe elements.
+            functions: Map from function symbols to Cayley tables or constant values.
+            relations: Map from relation symbols to extension sets or truth tables.
+            name: Optional human-readable structure name.
+
+        Returns:
+            :class:`Structure` with the given tables.
+
+        Raises:
+            KeyError: If a symbol in *signature* lacks an interpretation.
+        """
         functions = functions or {}
-        relations = relations or {}
+        relations = dict(relations or {})
         fn_interp: dict[str, Interpretation] = {}
         for sym, arity in signature.functions.items():
             if sym not in functions:
                 raise KeyError(sym)
             data = functions[sym]
             if arity == 0:
-                fn_interp[sym] = data  # type: ignore[assignment]
+                fn_interp[sym] = data
             else:
-                fn_interp[sym] = dict(data)  # type: ignore[arg-type]
+                fn_interp[sym] = dict(data)
 
         rel_interp: dict[str, Interpretation] = {}
         for sym, arity in signature.relations.items():
@@ -61,8 +78,15 @@ class Structure:
                 rel_interp[sym] = data
             else:
 
-                def make_rel(d=data, a=arity):
+                def make_rel(
+                    d: dict[tuple[Any, ...], bool] = data,
+                    _a: int = arity,
+                ) -> Callable[..., bool]:
+                    """Wrap a truth table dict as a variadic relation callable."""
+
                     def rel(*args: Any) -> bool:
+                        """Return whether tuple *args* is in the relation."""
+
                         return bool(d.get(args, False))
 
                     return rel
@@ -71,7 +95,28 @@ class Structure:
 
         return cls(signature, list(universe), fn_interp, rel_interp, name)
 
+    def universe_for(self, sort: Sort | str = DEFAULT_SORT) -> list[Any]:
+        """Return the carrier for *sort* (many-sorted lite).
+
+        When :attr:`universes` is set, named sorts map to their carriers; the
+        default sort ``U`` and unknown names fall back to :attr:`universe`.
+        """
+        if self.universes:
+            key = sort.name if isinstance(sort, Sort) else sort
+            if key in self.universes:
+                return list(self.universes[key])
+        return self.universe
+
     def call_function(self, name: str, args: tuple[Any, ...]) -> Any:
+        """Apply the interpretation of function symbol *name* to *args*.
+
+        Args:
+            name: Function symbol.
+            args: Tuple of arguments drawn from the universe.
+
+        Returns:
+            Value of the function on *args*.
+        """
         interp = self.functions[name]
         if callable(interp) and not isinstance(interp, dict):
             return interp(*args)
@@ -80,6 +125,15 @@ class Structure:
         return interp
 
     def call_relation(self, name: str, args: tuple[Any, ...]) -> bool:
+        """Test whether relation symbol *name* holds on *args*.
+
+        Args:
+            name: Relation symbol.
+            args: Tuple of arguments drawn from the universe.
+
+        Returns:
+            Truth value of the relation on *args*.
+        """
         interp = self.relations[name]
         if isinstance(interp, set):
             return args in interp
@@ -88,7 +142,17 @@ class Structure:
         return bool(interp(*args))
 
     def satisfies(self, formula: object) -> bool:
-        """True if this structure satisfies a closed formula."""
+        """Return whether this structure satisfies a closed formula.
+
+        Args:
+            formula: Closed :class:`~fopy.formulas.Formula` to test.
+
+        Returns:
+            ``True`` if *formula* holds in ``self``.
+
+        Raises:
+            TypeError: If *formula* is not a :class:`~fopy.formulas.Formula`.
+        """
         from fopy.formulas import Formula
         from fopy.semantics import satisfy
 

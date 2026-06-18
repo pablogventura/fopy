@@ -29,13 +29,7 @@ def hasse_covers(
         for j in range(n):
             if i == j or not matrix[i][j]:
                 continue
-            if any(
-                k != i
-                and k != j
-                and matrix[i][k]
-                and matrix[k][j]
-                for k in range(n)
-            ):
+            if any(k != i and k != j and matrix[i][k] and matrix[k][j] for k in range(n)):
                 continue
             result.add((ordered[i], ordered[j]))
     return result

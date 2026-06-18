@@ -41,7 +41,7 @@ def test_draw_optional_import():
     import fopy as fo
 
     try:
-        import fopy.draw  # noqa: F401
+        import fopy.draw
 
         assert fo.draw is not None
     except ImportError:

@@ -26,9 +26,7 @@ def tiny_model():
     ops = {"f": Operation.new("f", 2)}
     for row in ([0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 0]):
         ops["f"].add(row)
-    return __import__("fopy.finite.models", fromlist=["Model"]).Model.new(
-        [0, 1], operations=ops
-    )
+    return __import__("fopy.finite.models", fromlist=["Model"]).Model.new([0, 1], operations=ops)
 
 
 def test_variables_helper():
@@ -52,7 +50,7 @@ def test_formula_satisfy_vector(tiny_model):
 
 def test_formula_and_or(tiny_model):
     x, y = Variable.new("x"), Variable.new("y")
-    t1, t2 = Term.variable(x), Term.variable(y)
+    t1, t2 = Term.from_variable(x), Term.from_variable(y)
     a = eq(t1, t2)
     b = eq(t2, t1)
     c = and_formula(a, b)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from typing import cast
 
 import numpy as np
 
@@ -35,7 +36,7 @@ def project_3d_to_2d(
     """Orthographic projection after rotation."""
     matrix = projection_matrix(azimuth_deg, elevation_deg)
     rotated = positions_3d @ matrix.T
-    return rotated[:, :2].copy()
+    return cast(np.ndarray, rotated[:, :2].copy())
 
 
 def find_best_view(

@@ -1,0 +1,2 @@
+Relation T0 is not definable in the quantifier-free fragment.
+Obstruction: tuples (2, 3) (in T0) and (3, 2) (not in T0) share the same atomic term type and cannot be separated by any quantifier-free formula over this signature.

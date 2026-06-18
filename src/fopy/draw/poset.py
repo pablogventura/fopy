@@ -82,7 +82,7 @@ def validate_poset(
     Validate that leq or covers define a partial order.
 
     Returns the reflexive-transitive closure matrix.
-  """
+    """
     ordered, index = index_elements(elements)
     n = len(ordered)
     if leq is not None:

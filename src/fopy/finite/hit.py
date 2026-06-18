@@ -9,8 +9,8 @@ from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 from fopy.finite import open_formulas as formulas
-from fopy.finite.open_formulas import Formula, OpSym, Term, Variable
 from fopy.finite.models import Model
+from fopy.finite.open_formulas import Formula, OpSym, Term, Variable
 from fopy.finite.relops import Operation, Relation
 
 if TYPE_CHECKING:
@@ -19,15 +19,30 @@ if TYPE_CHECKING:
 
 @dataclass
 class HitConfig:
+    """Configuration knobs for the HIT definability search.
+
+    Attributes:
+        use_information_gain: When ``True``, rank candidate splits by information gain.
+        ig_sample: Number of candidate splits to sample when using information gain;
+            ``None`` enumerates all candidates (can be expensive).
+    """
+
     use_information_gain: bool = False
     ig_sample: int | None = 20
 
 
 @dataclass
 class Counterexample:
+    """Witness that no quantifier-free formula separates the target tuples.
+
+    Attributes:
+        tuples: List of universe-index tuples that HIT could not distinguish.
+    """
+
     tuples: list[list[int]]
 
     def __repr__(self) -> str:
+        """Return a concise debug representation."""
         return f"Counterexample({self.tuples!r})"
 
 
@@ -39,6 +54,8 @@ def _entropy(in_count: int, out_count: int) -> float:
     q = out_count / n
 
     def h(x: float) -> float:
+        """Binary entropy contribution ``-x log2 x`` (zero at ``x == 0``)."""
+
         return -x * math.log2(x) if x > 0 else 0.0
 
     return h(p) + h(q)
@@ -49,6 +66,17 @@ def information_gain_from_counts(
     in_total: int,
     partition_counts: dict[tuple[int, bool], tuple[int, int]],
 ) -> float:
+    """Compute information gain for a candidate partition of tuples.
+
+    Args:
+        n: Total number of tuples in the block.
+        in_total: Count of tuples that lie in all target relations.
+        partition_counts: Map from ``(bucket_index, in_target)`` to
+            ``(in_count, out_count)`` tallies per bucket.
+
+    Returns:
+        Entropy reduction (in bits) achieved by the partition.
+    """
     if n == 0:
         return 0.0
     out_total = n - in_total
@@ -60,13 +88,13 @@ def information_gain_from_counts(
     return h_before - h_after
 
 
-def _cartesian_product_indices(
-    pool: list[int], n: int, forced: set[int]
-) -> list[list[int]]:
+def _cartesian_product_indices(pool: list[int], n: int, forced: set[int]) -> list[list[int]]:
     if n == 0:
         return [[]]
 
     def build(current: list[int]) -> None:
+        """Depth-first extension of index tuples that hit *forced* indices."""
+
         if len(current) == n:
             if any(i in forced for i in current):
                 result.append(list(current))
@@ -81,6 +109,19 @@ def _cartesian_product_indices(
 
 @dataclass
 class TupleHistory:
+    """Evaluation trace of operations applied to one universe tuple.
+
+    Tracks how term indices evolve as HIT applies operation steps, so tuples
+    that follow the same computation path can be grouped.
+
+    Attributes:
+        t: Original universe-index tuple being refined.
+        history: Sequence of universe values produced along the trace.
+        index_map: Map from universe value to its index in *history*.
+        in_target: Whether *t* satisfies all target relations.
+        has_generated: Whether the last step introduced a new history value.
+    """
+
     t: list[int]
     history: list[int]
     index_map: dict[int, int] = field(default_factory=dict)
@@ -89,14 +130,25 @@ class TupleHistory:
 
     @classmethod
     def new(cls, t: list[int], targets: list[Relation]) -> TupleHistory:
+        """Create a fresh history for tuple *t* against *targets*."""
         history = list(t)
         index_map = {x: i for i, x in enumerate(t)}
-        in_target = all(
-            tg.contains(t) if tg.arity == len(t) else True for tg in targets
-        )
+        in_target = all(tg.contains(t) if tg.arity == len(t) else True for tg in targets)
         return cls(t=t, history=history, index_map=index_map, in_target=in_target)
 
     def step(self, op: Operation, ti: list[int]) -> int:
+        """Apply *op* to argument indices *ti*, extending *history* when needed.
+
+        Args:
+            op: Operation symbol table entry to apply.
+            ti: Indices into *history* selecting arguments.
+
+        Returns:
+            Index in *history* of the operation result.
+
+        Raises:
+            ValueError: If *op* is undefined on the selected arguments.
+        """
         args = [self.history[i] for i in ti]
         x = op.call(args)
         if x is None:
@@ -111,6 +163,18 @@ class TupleHistory:
         return idx
 
     def simulate_step(self, op: Operation, ti: list[int]) -> tuple[int, bool]:
+        """Preview :meth:`step` without mutating *history*.
+
+        Args:
+            op: Operation to simulate.
+            ti: Argument indices into the current history.
+
+        Returns:
+            Pair ``(result_index, would_extend_history)``.
+
+        Raises:
+            ValueError: If *op* is undefined on the selected arguments.
+        """
         args = [self.history[i] for i in ti]
         x = op.call(args)
         if x is None:
@@ -145,6 +209,23 @@ class _GenState:
 
 @dataclass
 class IndicesTupleGenerator:
+    """Enumerate operation-and-index candidates for refining HIT blocks.
+
+    Iterates syntactic terms and yields ``(operation, argument_indices)``
+    pairs used to split tuple histories.
+
+    Attributes:
+        ops: Operations grouped by arity.
+        arity: Target relation arity (number of tuple variables).
+        viejos: Indices of variables already seen in the search.
+        nuevos: Indices of variables introduced by recent term extensions.
+        sintactico: Current syntactic term for each variable index.
+        last_term: Term produced by the most recent :meth:`step` call.
+        forked: Whether this generator has been branched via :meth:`fork`.
+        finished: Whether candidate enumeration is exhausted.
+        state: Internal iterator state (implementation detail).
+    """
+
     ops: dict[int, list[Operation]]
     arity: int
     viejos: list[int]
@@ -163,7 +244,8 @@ class IndicesTupleGenerator:
         viejos: list[int],
         nuevos: list[int],
     ) -> IndicesTupleGenerator:
-        sintactico = [Term.variable(Variable.from_index(i)) for i in range(arity + 11)]
+        """Construct a generator for the given operation pool and variable indices."""
+        sintactico = [Term.from_variable(Variable.from_index(i)) for i in range(arity + 11)]
         return cls(
             ops=copy.deepcopy(ops),
             arity=arity,
@@ -173,6 +255,14 @@ class IndicesTupleGenerator:
         )
 
     def step(self) -> tuple[Operation, list[int]] | None:
+        """Advance to the next ``(operation, indices)`` candidate.
+
+        Returns:
+            Next candidate pair, or ``None`` when enumeration is complete.
+
+        Raises:
+            RuntimeError: If called after :meth:`fork` on the same instance.
+        """
         if self.forked:
             raise RuntimeError("Generator was forked!")
         while True:
@@ -261,22 +351,37 @@ class IndicesTupleGenerator:
                 return op, ti
 
     def formula_diferenciadora(self, index: int) -> Formula:
+        """Build an equality formula separating the last term from variable *index*."""
         assert self.last_term is not None
         return formulas.eq(self.last_term, self.sintactico[index])
 
     def hubo_nuevo(self) -> None:
+        """Register that the last step introduced a new syntactic variable index.
+
+        Raises:
+            RuntimeError: If called after :meth:`fork` on the same instance.
+        """
         if self.forked:
             raise RuntimeError("Generator was forked!")
         new_idx = len(self.viejos) + len(self.nuevos)
         self.nuevos.append(new_idx)
         while len(self.sintactico) <= new_idx:
-            self.sintactico.append(
-                Term.variable(Variable.from_index(len(self.sintactico)))
-            )
+            self.sintactico.append(Term.from_variable(Variable.from_index(len(self.sintactico))))
         assert self.last_term is not None
         self.sintactico[new_idx] = self.last_term
 
     def fork(self, quantity: int) -> list[IndicesTupleGenerator]:
+        """Clone this generator into *quantity* independent copies for branching.
+
+        Args:
+            quantity: Number of child generators to produce.
+
+        Returns:
+            List of generators sharing current state but not marked forked.
+
+        Raises:
+            RuntimeError: If :meth:`fork` is called more than once on the same instance.
+        """
         if self.forked:
             raise RuntimeError("Generator was forked!")
         self.forked = True
@@ -295,6 +400,7 @@ class IndicesTupleGenerator:
         ]
 
     def enumerate_candidates(self) -> list[tuple[Operation, list[int]]]:
+        """Collect all remaining candidates by exhaustively stepping a copy."""
         gen = copy.deepcopy(self)
         result: list[tuple[Operation, list[int]]] = []
         while True:
@@ -305,6 +411,7 @@ class IndicesTupleGenerator:
         return result
 
     def take_candidates(self, limit: int) -> list[tuple[Operation, list[int]]]:
+        """Collect up to *limit* candidates by stepping a copy."""
         gen = copy.deepcopy(self)
         result: list[tuple[Operation, list[int]]] = []
         for _ in range(limit):
@@ -317,6 +424,18 @@ class IndicesTupleGenerator:
 
 @dataclass
 class Block:
+    """A HIT search node: tuples sharing a partial open formula.
+
+    Attributes:
+        operations: Operation pool grouped by arity.
+        tuples: Tuple histories currently represented by this block.
+        targets: Target relations being defined.
+        formula: Open formula satisfied by all tuples in the block.
+        arity: Common arity of the target relations.
+        generator: Candidate generator for refining this block.
+        config: HIT search configuration.
+    """
+
     operations: dict[int, list[Operation]]
     tuples: list[TupleHistory]
     targets: list[Relation]
@@ -334,6 +453,7 @@ class Block:
         formula: Formula,
         config: HitConfig,
     ) -> Block:
+        """Create the initial block for a HIT run."""
         arity = targets[0].arity
         nuevos = list(range(arity))
         generator = IndicesTupleGenerator.new(operations, arity, [], nuevos)
@@ -348,15 +468,24 @@ class Block:
         )
 
     def is_all_in_targets(self) -> bool:
+        """Return ``True`` when every tuple in the block lies in all targets."""
         return all(th.in_target for th in self.tuples)
 
     def is_disjunt_to_targets(self) -> bool:
+        """Return ``True`` when no tuple in the block lies in all targets."""
         return all(not th.in_target for th in self.tuples)
 
     def finished(self) -> bool:
+        """Return ``True`` when the candidate generator is exhausted."""
         return self.generator.finished
 
     def step(self) -> list[Block] | Counterexample:
+        """Apply the next refinement split to this block.
+
+        Returns:
+            Either a list of child blocks after splitting, or a
+            :class:`Counterexample` when refinement stalls.
+        """
         op_ti = self._next_candidate()
         if op_ti is None:
             return [copy.deepcopy(self)]
@@ -367,10 +496,10 @@ class Block:
         tuples = self.tuples
         self.tuples = []
         for th in tuples:
-            th = copy.deepcopy(th)
-            idx = th.step(op, ti)
-            any_has_gen = any_has_gen or th.has_generated
-            result.setdefault(idx, []).append(th)
+            th_copy = copy.deepcopy(th)
+            idx = th_copy.step(op, ti)
+            any_has_gen = any_has_gen or th_copy.has_generated
+            result.setdefault(idx, []).append(th_copy)
 
         if len(result) == 1:
             if any_has_gen:
@@ -383,8 +512,7 @@ class Block:
         blocks: list[Block] = []
         fneg = formulas.true_formula(None)
         negados: list[tuple[int, int, list[TupleHistory]]] = []
-        i = 0
-        for index, tuples_new in sorted(result.items()):
+        for i, (index, tuples_new) in enumerate(sorted(result.items())):
             if any(th.has_generated for th in tuples_new):
                 generators[i].hubo_nuevo()
                 negados.append((i, index, tuples_new))
@@ -403,7 +531,6 @@ class Block:
                         config=self.config,
                     )
                 )
-            i += 1
         for i, _index, tuples_new in negados:
             f = self.formula.and_formula(fneg)
             blocks.append(
@@ -470,14 +597,26 @@ def is_open_def(
     targets: list[Relation],
     config: HitConfig | None = None,
 ) -> Formula | Counterexample:
-    """Run the HIT algorithm; returns a defining formula or a counterexample."""
+    """Run the HIT algorithm on *model* for the given *targets*.
+
+    Args:
+        model: Finite algebra providing operation tables.
+        targets: Target relations to define simultaneously (same arity).
+        config: Optional :class:`HitConfig`; defaults apply when omitted.
+
+    Returns:
+        A defining open :class:`~fopy.finite.open_formulas.Formula` when
+        definable, otherwise a :class:`Counterexample`.
+
+    Raises:
+        ValueError: If targets lack a preprocessing pattern.
+    """
     cfg = config or HitConfig()
     arity = targets[0].arity
     universe = model.universe
     mut_targets = targets
     tuples = [
-        TupleHistory.new(list(t), mut_targets)
-        for t in _cartesian_product_sized(universe, arity)
+        TupleHistory.new(list(t), mut_targets) for t in _cartesian_product_sized(universe, arity)
     ]
     tuples.sort(key=lambda th: th.t)
     operations: dict[int, list[Operation]] = {}

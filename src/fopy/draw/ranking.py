@@ -30,10 +30,7 @@ def _longest_paths(matrix: list[list[bool]], forward: bool) -> np.ndarray:
         for i in range(n):
             preds = np.where(adj[:, i])[0]
             preds = preds[preds != i]
-            if preds.size == 0:
-                candidate = 0
-            else:
-                candidate = int(dist[preds].max() + 1)
+            candidate = 0 if preds.size == 0 else int(dist[preds].max() + 1)
             if candidate > dist[i]:
                 dist[i] = candidate
                 changed = True

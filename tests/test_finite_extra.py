@@ -4,8 +4,8 @@ from pathlib import Path
 
 import fopy as fo
 from fopy.finite import is_open_definable
-from fopy.finite.relops import Operation, Relation
 from fopy.finite.models import Model
+from fopy.finite.relops import Operation, Relation
 from fopy.parse import parse_model
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"

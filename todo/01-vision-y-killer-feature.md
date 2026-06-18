@@ -406,6 +406,18 @@ pero `folua` sería más honesto y académico.
 [2]: https://smt-lib.org/?utm_source=chatgpt.com "SMT-LIB The Satisfiability Modulo Theories Library"
 [3]: https://microsoft.github.io/z3guide/docs/logic/Quantifiers/?utm_source=chatgpt.com "Quantifiers | Online Z3 Guide"
 
+## Estado de implementación (fase visión doc 01)
 
-
+- [x] §1 Núcleo FO lite many-sorted, alpha, CNF/DNF, TPTP/SMT, API `Vars`/`Function`/`Relation`
+- [x] §2 `FiniteAlgebra`, producto, subálgebras, homomorfismos, cociente, clon acotado
+- [x] §3 Model checking FO simbólico, eval cache, bitsets opcionales
+- [x] §4 Definibilidad qf/pp/ep/horn/fo con kernels k-types + HIT
+- [x] §5 Síntesis enumeración, CEGIS, SMT stub
+- [x] §6 `to_z3`, Z3 auxiliar
+- [x] §7 Builders Group/Ring/…, Maltsev/majority acotados
+- [x] §8 `Variety` (álgebra libre finita: stub documentado)
+- [x] §9 Hasse SVG + Mermaid/TikZ/HTML export
+- [x] §10 Notebook `show_tables`, `draw_*`, explain pretty
+- [x] §11 Hash-cons, plugins registry, ADRs 007–010
+- [x] Killer feature `explain_definability` multi-fragmento
 

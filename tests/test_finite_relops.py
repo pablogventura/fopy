@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 from fopy.finite.models import Model
 from fopy.finite.relops import Operation, Relation
 

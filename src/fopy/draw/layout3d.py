@@ -24,8 +24,7 @@ def initial_positions_3d(
     unique_levels = np.unique(levels)
     max_level = float(unique_levels.max()) if unique_levels.size else 0.0
     level_to_radius = {
-        float(level): radius_scale * (1.0 + 0.35 * float(level))
-        for level in unique_levels
+        float(level): radius_scale * (1.0 + 0.35 * float(level)) for level in unique_levels
     }
 
     for level in unique_levels:

@@ -12,6 +12,7 @@ venv/
 .hypothesis/
 .coverage
 htmlcov/
+site/
 out/
 *.svg
 !tests/**/*.svg

@@ -1,8 +1,9 @@
 """Property-based tests (optional hypothesis)."""
 
-import fopy as fo
 from hypothesis import given
 from hypothesis import strategies as st
+
+import fopy as fo
 
 
 @given(st.booleans(), st.booleans())

@@ -28,7 +28,5 @@ def test_draw_render_without_save(chain5_structure):
         chain5_structure.universe,
         leq=lambda a, b: chain5_structure.call_relation("leq", (a, b)),
     )
-    ax = fo.draw.render.draw_diagram(
-        layout.elements, layout.positions_2d, layout.covers
-    )
+    ax = fo.draw.render.draw_diagram(layout.elements, layout.positions_2d, layout.covers)
     assert ax is not None

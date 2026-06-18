@@ -10,7 +10,7 @@ def _orientation(a: np.ndarray, b: np.ndarray, c: np.ndarray) -> float:
 
 
 def _on_segment(a: np.ndarray, b: np.ndarray, c: np.ndarray, eps: float = 1e-9) -> bool:
-    return (
+    return bool(
         min(a[0], b[0]) - eps <= c[0] <= max(a[0], b[0]) + eps
         and min(a[1], b[1]) - eps <= c[1] <= max(a[1], b[1]) + eps
     )
@@ -33,9 +33,7 @@ def segments_intersect(p1: np.ndarray, p2: np.ndarray, q1: np.ndarray, q2: np.nd
         return True
     if abs(o3) < eps and _on_segment(q1, q2, p1):
         return True
-    if abs(o4) < eps and _on_segment(q1, q2, p2):
-        return True
-    return False
+    return bool(abs(o4) < eps and _on_segment(q1, q2, p2))
 
 
 def edge_crossings(positions_2d: np.ndarray, edges: list[tuple[int, int]]) -> int:

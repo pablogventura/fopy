@@ -31,7 +31,9 @@ def sample_formulas():
     }
 
 
-@pytest.mark.parametrize("key", ["atom", "eq", "and", "or", "not", "forall", "exists", "impl", "true", "false"])
+@pytest.mark.parametrize(
+    "key", ["atom", "eq", "and", "or", "not", "forall", "exists", "impl", "true", "false"]
+)
 def test_sstr_all(sample_formulas, key: str):
     text = fo.sstr(sample_formulas[key])
     assert isinstance(text, str)

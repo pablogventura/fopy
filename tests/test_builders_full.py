@@ -55,13 +55,7 @@ def test_from_cayley_bad_table():
 
 def test_fluent_builder_name():
     sig = fo.Signature(relations={"R": 2})
-    s = (
-        fo.builders.build(sig)
-        .universe(0, 1)
-        .relation("R", {(0, 0), (1, 1)})
-        .name("test")
-        .build()
-    )
+    s = fo.builders.build(sig).universe(0, 1).relation("R", {(0, 0), (1, 1)}).name("test").build()
     assert s.name == "test"
 
 

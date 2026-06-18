@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import re
+from typing import cast
 
-from fopy.formulas import Atom, Formula, ForAll, Exists
-from fopy.simplify import and_formula, eq as mk_eq, neg, or_formula
+from fopy.formulas import Atom, Exists, ForAll, Formula
+from fopy.simplify import and_formula, neg, or_formula
+from fopy.simplify import eq as mk_eq
+from fopy.sorts import Sort
 from fopy.symbols import Variable
-from fopy.terms import Apply, Constant
+from fopy.terms import Apply, Constant, Term
 
 _UNICODE = str.maketrans(
     {
@@ -49,11 +52,31 @@ def _find_top_level(s: str, ch: str) -> int | None:
     return None
 
 
+def _parse_variable_name(s: str) -> Variable:
+    """Parse ``name`` or ``name:Sort`` variable declarations."""
+    s = s.strip()
+    if ":" in s:
+        name, sort_name = s.split(":", 1)
+        return Variable(name.strip(), Sort(sort_name.strip()))
+    return Variable(s)
+
+
 def parse_term(
     s: str,
     funcs: dict[str, int] | None = None,
     vars_map: dict[str, Variable] | None = None,
-):
+) -> Term:
+    """Parse a first-order term string.
+
+    Args:
+        s: Source text for the term.
+        funcs: Optional map of function symbols to arities.
+        vars_map: Mutable map reused to assign stable :class:`~fopy.symbols.Variable`
+            objects to free names.
+
+    Returns:
+        Parsed :class:`~fopy.terms.Term`.
+    """
     s = s.strip()
     funcs = funcs or {}
     vars_map = vars_map or {}
@@ -67,8 +90,8 @@ def parse_term(
         args = tuple(parse_term(p, funcs, vars_map) for p in parts)
         return Apply(name, args)
     if s not in vars_map:
-        vars_map[s] = Variable(s)
-    return vars_map[s]
+        vars_map[s] = _parse_variable_name(s)
+    return cast(Term, vars_map[s])
 
 
 def _split_args(s: str) -> list[str]:
@@ -92,12 +115,25 @@ def parse_formula(
     funcs: dict[str, int] | None = None,
     rels: dict[str, int] | None = None,
 ) -> Formula:
-    """
-    Parse a first-order formula string.
+    """Parse a first-order formula string.
 
-    >>> from fopy.parse import parse_formula
-    >>> parse_formula("forall x exists y R(x,y)", rels={"R": 2})
-    ∀x ∃y R(x, y)
+    Supports ASCII and Unicode connectives/quantifiers (``∀``, ``∃``, ``∧``, …).
+
+    Args:
+        s: Source text for the formula.
+        funcs: Optional map of function symbols to arities.
+        rels: Optional map of relation symbols to arities.
+
+    Returns:
+        Parsed :class:`~fopy.formulas.Formula`.
+
+    Raises:
+        ValueError: If *s* is not a valid formula.
+
+    Examples:
+        >>> from fopy.parse import parse_formula
+        >>> parse_formula("forall x exists y R(x,y)", rels={"R": 2})
+        ∀x ∃y R(x, y)
     """
     s = _normalize(s)
     funcs = funcs or {}
@@ -107,12 +143,12 @@ def parse_formula(
     if s.startswith("forall "):
         rest = s[7:].strip()
         sp = rest.split(None, 1)
-        var = Variable(sp[0])
+        var = _parse_variable_name(sp[0])
         return ForAll(var, parse_formula(sp[1], funcs, rels))
     if s.startswith("exists "):
         rest = s[7:].strip()
         sp = rest.split(None, 1)
-        var = Variable(sp[0])
+        var = _parse_variable_name(sp[0])
         return Exists(var, parse_formula(sp[1], funcs, rels))
 
     idx = _find_top_level(s, "<->")
@@ -141,7 +177,7 @@ def parse_formula(
             parse_formula(s[:idx], funcs, rels),
             parse_formula(s[idx + 1 :], funcs, rels),
         )
-    if s.startswith("~") or s.startswith("-"):
+    if s.startswith(("~", "-")):
         return neg(parse_formula(s[1:], funcs, rels))
     if s.startswith("(") and s.endswith(")"):
         return parse_formula(s[1:-1], funcs, rels)
@@ -154,7 +190,10 @@ def parse_formula(
         return Atom(name, args)
 
     if "=" in s and "(" not in s.split("=")[0]:
-        left, right = s.split("=", 1)
-        return mk_eq(parse_term(left.strip(), funcs, vars_map), parse_term(right.strip(), funcs, vars_map))
+        lhs_str, rhs_str = s.split("=", 1)
+        return mk_eq(
+            parse_term(lhs_str.strip(), funcs, vars_map),
+            parse_term(rhs_str.strip(), funcs, vars_map),
+        )
 
     raise ValueError(f"Cannot parse formula: {s}")
