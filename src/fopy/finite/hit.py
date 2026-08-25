@@ -604,7 +604,23 @@ def is_open_def(
     Raises:
         ValueError: If targets lack a preprocessing pattern.
     """
+    from fopy.finite.hit_rust import RustFormulaParseError, is_open_def_rust, resolve_hit_backend
+
     cfg = config or HitConfig()
+    if resolve_hit_backend() == "rust":
+        try:
+            return is_open_def_rust(model, targets, cfg)
+        except RustFormulaParseError:
+            pass
+    return _is_open_def_python(model, targets, cfg)
+
+
+def _is_open_def_python(
+    model: Model,
+    targets: list[Relation],
+    config: HitConfig,
+) -> Formula | Counterexample:
+    """Pure-Python HIT (fallback when Rust is unavailable or formula parse fails)."""
     arity = targets[0].arity
     mut_targets = targets
     try:
@@ -626,7 +642,7 @@ def is_open_def(
     if pattern is None:
         raise ValueError("Target relation must have a pattern (run preprocessing first)")
     formula = pattern.preprocessed_formula()
-    start_block = Block.new(operations, tuples, mut_targets, formula, cfg)
+    start_block = Block.new(operations, tuples, mut_targets, formula, config)
     return _is_open_def_sequential(start_block)
 
 

@@ -81,7 +81,7 @@ Not detected: `make`, `tox`, Docker, migrations, build/publish to PyPI.
 ## Architecture notes
 
 - **Two layers**: (1) symbolic `Structure` + FO formulas; (2) `fopy.finite.Model` for algorithms on integers/universe tables.
-- **Open definability**: `fopy.finite.check_definability` / `Definability.explain` — fragments `qf` (HIT), `pp`, `ep`, `horn`, `fo` (k-types, small `|U|`). Legacy alias: `is_open_definable` (= `qf`).
+- **Open definability**: `fopy.finite.check_definability` / `Definability.explain` — fragments `qf` (HIT via OpenDefAlgSplitting Rust subprocess; Python fallback in `hit.py`), `pp`, `ep`, `horn`, `fo` (k-types, small `|U|`). Legacy alias: `is_open_definable` (= `qf`).
 - **Eval cache / fast paths**: `eval_cache`, `eval_fast` (numpy/bitsets when `[fast]` or draw deps present).
 - **Theories**: `Variety.models_of_cardinality` brute-forces small models (n ≤ 3, capped); `free_algebra_generators` uses `theory_free_algebra`.
 - **Hash-cons**: `fopy.core.hashcons.enable_hashcons()` interns `Variable`, `Apply`, `Constant`, `Atom`, `Eq`.

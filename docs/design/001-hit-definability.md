@@ -14,8 +14,10 @@ the HIT term-tree search.
 ## Decision
 
 `fopy.finite.is_open_definable` uses **pattern splitting** (`split_targets`) and
-**HIT** (`is_open_def`) ported from OpenDefAlgSplitting. We do not port
-constellation/Minion code.
+**HIT** via **OpenDefAlgSplitting** (Rust subprocess) when the `opendefalgsplitting`
+binary is available (`FOPY_OPENDEF_BIN`, or a built crate under
+`OpenDefAlgSplitting/target/`). Otherwise it falls back to the Python port in
+`fopy.finite.hit.is_open_def`. We do not port constellation/Minion code.
 
 ## Consequences
 

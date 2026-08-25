@@ -57,6 +57,9 @@ transformar, evaluar e imprimir fórmulas FO, estructuras finitas y algoritmos d
    **abiertas** (sin cuantificadores) sobre operaciones, y el algoritmo **HIT**
    (Horn Information Tree) con *splitting* de targets para decidir si una relación
    objetivo es **definible sin cuantificadores** a partir de las operaciones.
+   El kernel QF/HIT se ejecuta en **Rust** ([OpenDefAlgSplitting](https://github.com/pablogventura/OpenDefAlgSplitting))
+   vía subprocess cuando el binario está disponible; el fallback Python queda en
+   `fopy.finite.hit` para entornos sin el crate compilado.
 
 La funcionalidad distintiva es **`explain_definability`**: no solo responde sí/no, sino que
 produce una explicación legible, una fórmula testigo (caso positivo) u obstrucción
@@ -109,8 +112,8 @@ Referencia rápida de **qué puede hacer la librería hoy** (v0.1 alpha). Detall
 | Model checking | `models`, `counterexample`, `satisfying_assignments` |
 | Cache de evaluación | `EvalCache`, `satisfy_cached` |
 | Evaluación rápida | `eval_fast` (numpy/bitsets con `[fast]` o `[draw]`) |
-| **Definibilidad QF (HIT)** | `is_open_definable`, `check_definability`, `HitConfig` |
-| **Multi-fragmento** | `explain_definability(..., fragment=)` — `qf`, `pp`, `ep`, `horn`, `fo` |
+| **Definibilidad QF (HIT Rust)** | `is_open_definable`, `check_definability`, `HitConfig` — backend OpenDefAlgSplitting |
+| **Multi-fragmento** | `explain_definability(..., fragment=)` — `qf` (Rust HIT), `pp`, `ep`, `horn`, `fo` (kernels fopy) |
 | Explicación + obstrucciones | `ExplainReport`, `atomic_type`, `proof_sketch`, LaTeX |
 | Certificados JSON v2 | `serialize_certificate`, `verify_certificate`, `TrustedKernel` |
 | Síntesis de fórmulas | `synthesize_defining_formula`, `formula_complexity` |
@@ -575,6 +578,27 @@ El preprocesamiento descompone targets complejos en sub-targets más simples
 objetivo `T`, ¿existe una fórmula **sin cuantificadores** sobre las operaciones
 cuya extensión coincide exactamente con `T`?
 
+### Backend QF: OpenDefAlgSplitting (Rust)
+
+Por defecto, `is_open_definable` / `check_definability(..., fragment="qf")` delegan
+en el binario **[OpenDefAlgSplitting](https://github.com/pablogventura/OpenDefAlgSplitting)**
+(HIT + splitting + selector de estrategia). fopy serializa el `Model` a `.model`,
+invoca el CLI y parsea fórmula o contraejemplo.
+
+| Variable | Efecto |
+|----------|--------|
+| `FOPY_OPENDEF_BIN` | Ruta al ejecutable `opendefalgsplitting` |
+| `FOPY_HIT_BACKEND` | `auto` (default), `rust` o `python` |
+
+Sin binario Rust, el backend cae al port Python en `fopy.finite.hit`.
+
+Los fragmentos **EP**, **PP**, **Horn** y **FO acotado** usan los kernels k-types
+de fopy (`fopy.finite.fragments`); no pasan por Rust.
+
+El paquete legacy **[definability](https://github.com/pablogventura/definability)**
+(Minion, constelaciones, Sage/Jython) queda **congelado** para open/QF; ver su README
+para el camino histórico y para ∃⁺ vía morfismos.
+
 ```python
 from fopy.finite import is_open_definable, DefinabilityResult, HitConfig
 
@@ -601,7 +625,7 @@ result = is_open_definable(model, target, cfg)
 ### Algoritmo
 
 1. **Preprocesamiento** del target (`preprocesamiento2` / `split_targets`).
-2. **HIT** (`is_open_def`) — búsqueda de fórmula o contraejemplo.
+2. **HIT** (`is_open_def`) — OpenDefAlgSplitting en Rust, o port Python si no hay binario.
 3. Combinación de subfórmulas si el splitting produce varios piezas.
 
 No se usa el enfoque de constelaciones/Minion del proyecto legacy `definability`.
@@ -656,11 +680,11 @@ Ver [docs/design/004-explain-definability.md](docs/design/004-explain-definabili
 
 | Fragmento | Alias | Kernel |
 |-----------|-------|--------|
-| `qf` | `open`, `quantifier-free` | HIT |
-| `pp` | positive primitive | k-tipos PP |
-| `ep` | existential positive | k-tipos EP |
-| `horn` | Horn | k-tipos Horn |
-| `fo` | first-order (acotado) | k-tipos FO |
+| `qf` | `open`, `quantifier-free` | HIT Rust (OpenDefAlgSplitting) |
+| `pp` | positive primitive | k-tipos PP (fopy) |
+| `ep` | existential positive | k-tipos EP (fopy) |
+| `horn` | Horn | k-tipos Horn (fopy) |
+| `fo` | first-order (acotado) | k-tipos FO (fopy) |
 
 ```python
 from fopy.finite import Definability
@@ -925,10 +949,24 @@ La síntesis `smt_synthesize` en `fopy.finite` usa Z3 cuando está instalado.
 
 ---
 
+## Atlas experimental de definibilidad
+
+Capa **opt-in** (`fopy.experiments`, no exportada desde `import fopy`) para corridas
+en grilla: genera álgebras y targets, ejecuta `explain_definability` en varios
+fragmentos y escribe JSONL + CSV agregado. Diseño y limitaciones:
+[ADR 011](docs/design/011-definibility-atlas.md).
+
+```bash
+python scripts/run_definability_atlas.py --smoke   # out/atlas/results.jsonl + summary.csv
+```
+
+---
+
 ## Scripts y CLI
 
 | Comando | Descripción |
 |---------|-------------|
+| `python scripts/run_definability_atlas.py --smoke` | atlas experimental (smoke) |
 | `python scripts/demo_fo.py` | fórmulas FO, builders, definibilidad básica |
 | `python scripts/demo_explain.py [archivo.model]` | explain + certificado |
 | `python -m fopy.draw` / `fopy-draw` | SVG de ejemplos estándar |
