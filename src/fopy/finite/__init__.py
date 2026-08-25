@@ -30,6 +30,13 @@ from fopy.finite.hit import (
     information_gain_from_counts,
     is_open_def,
 )
+from fopy.finite.lindenbaum import (
+    LindenbaumResult,
+    chain_product_lattice,
+    existential_positive_lindenbaum,
+    join_irreducibles,
+    open_lindenbaum,
+)
 from fopy.finite.model_checking import counterexample, models, satisfying_assignments
 from fopy.finite.models import FiniteAlgebra, Model
 from fopy.finite.open_formulas import (
@@ -72,6 +79,7 @@ __all__ = [
     "FormulaSearch",
     "HitConfig",
     "IndicesTupleGenerator",
+    "LindenbaumResult",
     "Model",
     "Obstruction",
     "OpSym",
@@ -87,11 +95,13 @@ __all__ = [
     "and_formula",
     "atomic_type",
     "cegis_synthesize",
+    "chain_product_lattice",
     "check_definability",
     "counterexample",
     "deserialize_certificate",
     "direct_product",
     "eq",
+    "existential_positive_lindenbaum",
     "explain_definability",
     "explain_obstruction",
     "extension",
@@ -102,10 +112,12 @@ __all__ = [
     "information_gain_from_counts",
     "is_open_def",
     "is_open_definable",
+    "join_irreducibles",
     "latex_open_formula",
     "models",
     "neg",
     "normalize_fragment",
+    "open_lindenbaum",
     "or_formula",
     "preprocesamiento2",
     "resolve_target",

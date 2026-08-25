@@ -42,6 +42,7 @@ all = ["fopy[draw,dev,solvers,docs,fast]"]
 
 [project.scripts]
 fopy-draw = "fopy.draw.__main__:main"
+deflab = "fopy.cli.deflab:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

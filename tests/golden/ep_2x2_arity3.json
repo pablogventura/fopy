@@ -1,0 +1,32 @@
+{
+  "grid": "2x2",
+  "arity": 3,
+  "fragment": "ep",
+  "universe_size": 4,
+  "join_irreducible_count": 22,
+  "fingerprints": [
+    "c4fef6f8f21cdc47",
+    "0e683c8e1591931f",
+    "7fca6ff61f744bb9",
+    "e93dc5bbc79cd67e",
+    "19b5fd2f719b4fd3",
+    "57ca2d1667e7bcde",
+    "8e484da6175975ec",
+    "c748c016f87e656e",
+    "756e3960f621b541",
+    "cacf8c3006af22cd",
+    "fce4d0995f7dcb24",
+    "a00d0a97983da9ea",
+    "b66dc31bb2046e40",
+    "8e335deb123f8cad",
+    "61e649c91d96f606",
+    "fb359a4af566138b",
+    "e0beaee716d3e156",
+    "13b795af6b817059",
+    "a269e858e5cf1988",
+    "828ce1c5bde3adba",
+    "485480abddaf8e47",
+    "baed112dbc69930d"
+  ],
+  "notes": "tiporet meet/join on C2xC2 (= B2); EP Lindenbaum JIs without Minion"
+}

@@ -4,6 +4,11 @@
 transformar, evaluar e imprimir fórmulas FO, estructuras finitas y algoritmos de
 **definibilidad en varios fragmentos** (QF/HIT, PP, EP, Horn, FO acotado) sobre álgebras finitas.
 
+Este árbol vive bajo el laboratorio **DefLab** en
+[`adga_tesis`](https://github.com/pablogventura/adga_tesis) (hermano de `qfdef/` y
+`OpenDefAlgSplitting/`). Ver el `LAB.md` del monorepo para la misión del lab y la CLI
+`deflab`.
+
 | | |
 |---|---|
 | **Versión** | 0.1.0 (alpha) |
@@ -11,6 +16,7 @@ transformar, evaluar e imprimir fórmulas FO, estructuras finitas y algoritmos d
 | **Licencia** | MIT |
 | **Dependencias runtime** | ninguna (núcleo puro Python) |
 | **Extras** | `[draw]` · `[dev]` · `[solvers]` · `[docs]` · `[fast]` · `[viz]` · `[all]` |
+| **CLI DefLab** | `deflab` / `python -m fopy.cli.deflab` |
 
 ---
 
@@ -112,8 +118,9 @@ Referencia rápida de **qué puede hacer la librería hoy** (v0.1 alpha). Detall
 | Model checking | `models`, `counterexample`, `satisfying_assignments` |
 | Cache de evaluación | `EvalCache`, `satisfy_cached` |
 | Evaluación rápida | `eval_fast` (numpy/bitsets con `[fast]` o `[draw]`) |
-| **Definibilidad QF (HIT Rust)** | `is_open_definable`, `check_definability`, `HitConfig` — backend OpenDefAlgSplitting |
-| **Multi-fragmento** | `explain_definability(..., fragment=)` — `qf` (Rust HIT), `pp`, `ep`, `horn`, `fo` (kernels fopy) |
+| **Definibilidad QF (HIT Rust)** | `is_open_definable`, `check_definability`, `HitConfig` - backend OpenDefAlgSplitting |
+| **Multi-fragmento** | `explain_definability(..., fragment=)` - `qf` (Rust HIT), `pp`, `ep`, `horn`, `fo` (kernels fopy) |
+| **Lindenbaum (EP / open)** | `join_irreducibles`, `existential_positive_lindenbaum` - JIs sin Minion |
 | Explicación + obstrucciones | `ExplainReport`, `atomic_type`, `proof_sketch`, LaTeX |
 | Certificados JSON v2 | `serialize_certificate`, `verify_certificate`, `TrustedKernel` |
 | Síntesis de fórmulas | `synthesize_defining_formula`, `formula_complexity` |
@@ -966,12 +973,26 @@ python scripts/run_definability_atlas.py --smoke   # out/atlas/results.jsonl + s
 
 | Comando | Descripción |
 |---------|-------------|
+| `python -m fopy.cli.deflab --help` / `deflab` | DefLab: `check`, `lindenbaum`, `census` |
 | `python scripts/run_definability_atlas.py --smoke` | atlas experimental (smoke) |
 | `python scripts/demo_fo.py` | fórmulas FO, builders, definibilidad básica |
 | `python scripts/demo_explain.py [archivo.model]` | explain + certificado |
 | `python -m fopy.draw` / `fopy-draw` | SVG de ejemplos estándar |
-| `pytest tests/ -m finite` | regresión HIT sobre fixtures |
+| `pytest tests/ -m finite` | regresión HIT / Lindenbaum sobre fixtures |
 | `pytest tests/ -m draw` | tests de visualización |
+
+### DefLab CLI
+
+```bash
+pip install -e .
+python -m fopy.cli.deflab check --fragment qf --model tests/fixtures/models/minimal.model --target T0
+python -m fopy.cli.deflab lindenbaum --fragment ep --model 2x2 --arity 3
+python -m fopy.cli.deflab census --fragment ep --model 2x2 --arity 3 -o /tmp/ep_census.json
+```
+
+`--model` acepta grillas tiporet (`2x2`, `3x3`, ...) o una ruta `.model`.
+El generador Lindenbaum EP enumera homomorfismos entre subálgebras en Python puro
+(sin Minion); golden: `tests/golden/ep_2x2_arity3.json` (22 JI en aridad 3).
 
 ---
 
@@ -1046,21 +1067,24 @@ fopy/
 │   ├── builders/            # chain, B_n, from_covers, fluent API
 │   ├── parse/               # parse_formula, parse_model
 │   ├── printing/            # latex, tptp, smtlib, open
-│   ├── finite/              # ★ modelos, HIT, explain, certificados
+│   ├── finite/              # modelos, HIT, Lindenbaum, explain
 │   │   ├── models.py
 │   │   ├── open_formulas.py, open_parse.py
 │   │   ├── hit.py           # algoritmo HIT
+│   │   ├── lindenbaum.py    # JI EP/open sin Minion
 │   │   ├── definability.py  # is_open_definable
 │   │   ├── explain.py       # explain_definability
 │   │   ├── certificates.py
 │   │   ├── model_checking.py, synthesis.py, algebra.py
 │   │   └── preprocessing.py
+│   ├── cli/                 # DefLab: check / lindenbaum / census
 │   ├── universal/           # subálgebras, congruencias, retículos
 │   ├── draw/                # Hasse (opcional)
 │   └── solvers/             # z3 (opcional)
 ├── tests/
 │   ├── fixtures/models/     # ~50 archivos .model de regresión
-│   └── fixtures/expected/   # golden outputs (explain)
+│   ├── fixtures/expected/   # golden outputs (explain)
+│   └── golden/              # fingerprints Lindenbaum (EP 2x2)
 ├── docs/design/             # ADRs
 ├── scripts/                 # demos
 ├── todo/                    # notas de visión (no backlog v0.1)
