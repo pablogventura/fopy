@@ -12,6 +12,31 @@ from fopy.finite.models import Model
 from fopy.finite.relops import Relation
 
 
+def _equality_pattern(row: tuple[int, ...]) -> tuple[int, ...]:
+    """Pairwise equality bits for *row* (i < j)."""
+    bits: list[int] = []
+    for i in range(len(row)):
+        for j in range(i + 1, len(row)):
+            bits.append(1 if row[i] == row[j] else 0)
+    return tuple(bits)
+
+
+def _ep_matrix_type(
+    model: Model,
+    row: tuple[int, ...],
+    *,
+    max_depth: int,
+) -> tuple[object, ...]:
+    """PP type, or equality pattern when the operational signature is empty.
+
+    Absolute element ids are not EP-definable without constants/ops; using them
+    as the type key over-accepts (every singleton block looks pure).
+    """
+    if not model.operations:
+        return _equality_pattern(row)
+    return atomic_pp_type(model, row, max_depth=max_depth)
+
+
 def _ep_type_key(
     model: Model,
     row: tuple[int, ...],
@@ -19,14 +44,14 @@ def _ep_type_key(
     max_depth: int,
     max_existentials: int = 1,
 ) -> tuple[object, ...]:
-    """Refine a PP type with bounded existential extensions over the universe."""
-    base = atomic_pp_type(model, row, max_depth=max_depth)
+    """Refine a matrix type with bounded existential extensions over the universe."""
+    base = _ep_matrix_type(model, row, max_depth=max_depth)
     extensions: list[tuple[object, ...]] = []
     universe = model.universe
     for _m in range(1, max_existentials + 1):
         for extra in product(universe, repeat=_m):
             extended = row + extra
-            extensions.append(atomic_pp_type(model, extended, max_depth=max_depth))
+            extensions.append(_ep_matrix_type(model, extended, max_depth=max_depth))
     return (base, tuple(sorted(extensions)))
 
 
@@ -40,9 +65,12 @@ def is_ep_definable(
     """Decide existential-positive definability using PP type refinement.
 
     Existential-positive (EP) formulas allow existentially quantified variables
-    before a primitive-positive matrix.  This checker refines PP types by the
-    multiset of PP types of bounded existential extensions (adding up to
+    before a primitive-positive matrix.  This checker refines matrix types by the
+    multiset of types of bounded existential extensions (adding up to
     *max_existentials* fresh coordinates ranging over the universe).
+
+    When the model has no operations, the matrix type is the equality pattern of
+    the tuple (parity with Rust ``ep_type``), not absolute element ids.
 
     Args:
         model: Finite algebra providing the signature.
