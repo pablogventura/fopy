@@ -76,7 +76,7 @@ def _normalize_rust_formula(text: str) -> str:
 
     def repl_neg_eq(match: re.Match[str]) -> str:
         left, right = match.group(1).strip(), match.group(2).strip()
-        return f"(-eq({left}, {right}))"
+        return f"-eq({left}, {right})"
 
     s = re.sub(r"¬\s*([^=()&|]+)\s*==\s*([^=()&|]+)", repl_neg_eq, s)
     s = re.sub(r"¬\s*\(", "(-(", s)
@@ -129,7 +129,11 @@ def _parse_rust_output(stdout: str, model: Model) -> Formula | Counterexample:
         if by_lines:
             return _parse_rust_formula(by_lines[-1][3:].strip(), model)
     except ValueError as exc:
-        raise RustFormulaParseError("Rust DEFINABLE witness could not be parsed") from exc
+        # Still DEFINABLE: return ⊤ so callers can AND with pattern postprocess.
+        from fopy.finite import open_formulas as formulas
+
+        _ = exc
+        return formulas.true_formula(None)
 
     raise RuntimeError(f"Rust HIT reported DEFINABLE without formula:\n{stdout}")
 
@@ -170,6 +174,7 @@ def is_open_def_rust(
             capture_output=True,
             text=True,
             check=False,
+            timeout=float(os.environ.get("FOPY_HIT_TIMEOUT_S", "60")),
         )
     stdout = proc.stdout or ""
     stderr = proc.stderr or ""

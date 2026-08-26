@@ -1,0 +1,49 @@
+{
+  "backend": "python",
+  "decided": 68,
+  "definable_false": 0,
+  "definable_true": 68,
+  "disagreements": [],
+  "error_samples": [
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 15.0s",
+      "fragment": "gf",
+      "model": "cadena4",
+      "target": "T0"
+    },
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 15.0s",
+      "fragment": "pp",
+      "model": "modeloqueanda",
+      "target": "T0"
+    },
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 15.0s",
+      "fragment": "gf",
+      "model": "modeloqueanda",
+      "target": "T0"
+    },
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 15.0s",
+      "fragment": "atomic_conj",
+      "model": "modeloqueanda",
+      "target": "T0"
+    },
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 15.0s",
+      "fragment": "gf",
+      "model": "retrombo3",
+      "target": "T0"
+    }
+  ],
+  "errors": 5,
+  "rayon_num_threads": "2",
+  "skipped": 3,
+  "stamp": "20260826_c3_gf_horn",
+  "total_rows": 76
+}

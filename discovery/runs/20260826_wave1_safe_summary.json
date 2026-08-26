@@ -1,0 +1,647 @@
+{
+  "backend": "auto",
+  "decided": 371,
+  "definable_false": 57,
+  "definable_true": 314,
+  "disagreements": [
+    {
+      "definable_no": [
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split",
+        "qf/hit",
+        "qf/merge"
+      ],
+      "model": "C2x2",
+      "target": "T_le"
+    },
+    {
+      "definable_no": [
+        "qf/hit",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split",
+        "qf/merge"
+      ],
+      "model": "algebra",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "qf/hit",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "gf/split",
+        "pp/split"
+      ],
+      "model": "miprueba",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "ep/split",
+        "ex/split",
+        "qf/hit",
+        "qf/merge",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "modelo_solo_target",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "pp/split",
+        "qf/hit",
+        "qf/merge"
+      ],
+      "model": "modeloqueanda",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "qf/hit"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split",
+        "qf/merge",
+        "qf_pos/split"
+      ],
+      "model": "posetrombo",
+      "target": "T_full"
+    },
+    {
+      "definable_no": [
+        "ep/split",
+        "ex/split",
+        "qf/hit",
+        "qf/merge",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "posetrombo",
+      "target": "T_half"
+    },
+    {
+      "definable_no": [
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split",
+        "qf/hit",
+        "qf/merge"
+      ],
+      "model": "retrombo_incomparables",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split",
+        "qf/hit",
+        "qf/merge"
+      ],
+      "model": "retrombo_incomparables_iguales",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "ep/split",
+        "ex/split",
+        "qf/hit",
+        "qf/merge",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "retrombo_nodef",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "ep/split",
+        "ex/split",
+        "qf/hit",
+        "qf/merge",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "retrombo_nodef_sinpura",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split",
+        "qf/hit",
+        "qf/merge"
+      ],
+      "model": "retromboconstantes",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "ep/split",
+        "ex/split",
+        "qf/hit",
+        "qf/merge",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "romboconinfimo",
+      "target": "T_half"
+    },
+    {
+      "definable_no": [
+        "qf/hit",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split",
+        "qf/merge"
+      ],
+      "model": "suma4",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "ep/split",
+        "ex/split",
+        "qf/hit",
+        "qf/merge",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "target_vacio",
+      "target": "T_half"
+    },
+    {
+      "definable_no": [
+        "qf/hit",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split",
+        "qf/merge"
+      ],
+      "model": "unary_cycle3_partial",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "qf/hit"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split",
+        "qf/merge",
+        "qf_pos/split"
+      ],
+      "model": "unary_empty_noops",
+      "target": "T_full"
+    },
+    {
+      "definable_no": [
+        "ep/split",
+        "ex/split",
+        "qf/hit",
+        "qf/merge",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "unary_empty_noops",
+      "target": "T_half"
+    },
+    {
+      "definable_no": [
+        "qf/hit",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/split",
+        "ex/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split",
+        "qf/merge"
+      ],
+      "model": "unary_flip_partial",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "ep/split",
+        "ex/split",
+        "qf/hit",
+        "qf/merge",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "unary_partial_noops",
+      "target": "T0"
+    }
+  ],
+  "error_samples": [
+    {
+      "engine": "merge",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "qf",
+      "model": "C2x2",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "qf_pos",
+      "model": "C2x2",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "ep",
+      "model": "C2x2",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "ex",
+      "model": "C2x2",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "pp",
+      "model": "C2x2",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "atomic_conj",
+      "model": "C2x2",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "gf",
+      "model": "C2x2",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "fo",
+      "model": "C2x2",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "horn",
+      "model": "C2x2",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 20.0s",
+      "fragment": "gf",
+      "model": "cadena4",
+      "target": "T0"
+    },
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 20.0s",
+      "fragment": "gf",
+      "model": "modeloqueanda",
+      "target": "T0"
+    },
+    {
+      "engine": "merge",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "qf",
+      "model": "posetrombo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "qf_pos",
+      "model": "posetrombo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "ep",
+      "model": "posetrombo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "ex",
+      "model": "posetrombo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "pp",
+      "model": "posetrombo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "atomic_conj",
+      "model": "posetrombo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "gf",
+      "model": "posetrombo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "fo",
+      "model": "posetrombo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "horn",
+      "model": "posetrombo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 20.0s",
+      "fragment": "gf",
+      "model": "retrombo3",
+      "target": "T0"
+    },
+    {
+      "engine": "merge",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "qf",
+      "model": "romboconinfimo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "qf_pos",
+      "model": "romboconinfimo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "ep",
+      "model": "romboconinfimo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "ex",
+      "model": "romboconinfimo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "pp",
+      "model": "romboconinfimo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "atomic_conj",
+      "model": "romboconinfimo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "gf",
+      "model": "romboconinfimo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "fo",
+      "model": "romboconinfimo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "horn",
+      "model": "romboconinfimo",
+      "target": "T_empty"
+    },
+    {
+      "engine": "merge",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "qf",
+      "model": "target_vacio",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "qf_pos",
+      "model": "target_vacio",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "ep",
+      "model": "target_vacio",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "ex",
+      "model": "target_vacio",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "pp",
+      "model": "target_vacio",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "atomic_conj",
+      "model": "target_vacio",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "gf",
+      "model": "target_vacio",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "fo",
+      "model": "target_vacio",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "horn",
+      "model": "target_vacio",
+      "target": "T_empty"
+    },
+    {
+      "engine": "merge",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "qf",
+      "model": "unary_empty_noops",
+      "target": "T_empty"
+    }
+  ],
+  "errors": 48,
+  "rayon_num_threads": "2",
+  "skipped": 21,
+  "stamp": "20260826_wave1_safe",
+  "total_rows": 440
+}

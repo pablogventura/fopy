@@ -107,8 +107,11 @@ def split_targets(target: Relation) -> list[Relation]:
         target: Relation to decompose.
 
     Returns:
-        List of pattern-refined target relations.
+        List of pattern-refined target relations. Empty targets are kept as-is
+        so engines can return the constantly-false formula.
     """
+    if not target.r:
+        return [target]
     pruned_relations: dict[Pattern, list[list[int]]] = {}
     for t in target.r:
         pattern = Pattern.new(list(t))

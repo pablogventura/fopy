@@ -1,0 +1,51 @@
+{
+  "backend": "auto",
+  "decided": 13,
+  "definable_false": 3,
+  "definable_true": 10,
+  "disagreements": [
+    {
+      "definable_no": [
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "ep/split",
+        "qf/hit"
+      ],
+      "model": "C2x2",
+      "target": "T_le"
+    },
+    {
+      "definable_no": [
+        "qf/hit",
+        "qf_pos/split"
+      ],
+      "definable_yes": [
+        "ep/split"
+      ],
+      "model": "algebra",
+      "target": "T0"
+    }
+  ],
+  "error_samples": [
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "qf_pos",
+      "model": "C2x2",
+      "target": "T_empty"
+    },
+    {
+      "engine": "split",
+      "error": "RuntimeError: Rust engine produced no verdict:\n\nERROR: NO TARGET RELATIONS FOUND\n",
+      "fragment": "ep",
+      "model": "C2x2",
+      "target": "T_empty"
+    }
+  ],
+  "errors": 2,
+  "rayon_num_threads": "2",
+  "skipped": 0,
+  "stamp": "smoke_safe",
+  "total_rows": 15
+}

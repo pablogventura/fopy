@@ -1,0 +1,107 @@
+{
+  "campaign": "c4c5",
+  "grids": {
+    "2x2": {
+      "ep_a2": {
+        "elapsed_ms": 10.76,
+        "fingerprints": [
+          "c7e215e86ac36dcb",
+          "2484287fb8a63f1a",
+          "3ef22f645730f7e1",
+          "c45af60816fe459d"
+        ],
+        "join_irreducible_count": 4
+      },
+      "ep_a3": {
+        "elapsed_ms": 25.41,
+        "fingerprints": [
+          "c4fef6f8f21cdc47",
+          "0e683c8e1591931f",
+          "7fca6ff61f744bb9",
+          "e93dc5bbc79cd67e",
+          "19b5fd2f719b4fd3",
+          "57ca2d1667e7bcde",
+          "8e484da6175975ec",
+          "c748c016f87e656e",
+          "756e3960f621b541",
+          "cacf8c3006af22cd",
+          "fce4d0995f7dcb24",
+          "a00d0a97983da9ea",
+          "b66dc31bb2046e40",
+          "8e335deb123f8cad",
+          "61e649c91d96f606",
+          "fb359a4af566138b",
+          "e0beaee716d3e156",
+          "13b795af6b817059",
+          "a269e858e5cf1988",
+          "828ce1c5bde3adba",
+          "485480abddaf8e47",
+          "baed112dbc69930d"
+        ],
+        "join_irreducible_count": 22
+      },
+      "open_a2": {
+        "elapsed_ms": 7.98,
+        "fingerprints": [
+          "c7e215e86ac36dcb",
+          "e733f23946070a4c",
+          "1caf7da9cc9dca30",
+          "cc7a8a506fc611e6"
+        ],
+        "join_irreducible_count": 4
+      },
+      "open_a3": {
+        "elapsed_ms": 8.71,
+        "fingerprints": [
+          "c4fef6f8f21cdc47",
+          "476d53159f14ece2",
+          "84a34fb67f9500b1",
+          "62c331c98df17a32",
+          "412c91084e79cbde",
+          "c7a9db7e346b0654",
+          "228c8e405d3eaf71",
+          "8ecb3e5f747ba4a6",
+          "2f49efbaf84c350d",
+          "d87942901063a6a7",
+          "2dfe98dd6178981d",
+          "cff9ebf8fea77dbf",
+          "1335071df49ab79d",
+          "00fedc651d2468b4",
+          "0bb40b7d0754d2e7",
+          "8d64da05ae4d3c22",
+          "c704b113cbe0902f",
+          "0d58b51ff7e0f211",
+          "f957b7440a8c38b8",
+          "98b2b22b69955809",
+          "fd692e1607f33eae",
+          "2790c9b7083b119e"
+        ],
+        "join_irreducible_count": 22
+      }
+    }
+  },
+  "positive_vs_hit": [
+    {
+      "qf/hit": {
+        "definable": true,
+        "ms": 12.59
+      },
+      "qf_pos/split": {
+        "definable": true,
+        "ms": 3020.39
+      },
+      "target": "T_diag"
+    },
+    {
+      "qf/hit": {
+        "definable": true,
+        "ms": 8.15
+      },
+      "qf_pos/split": {
+        "definable": false,
+        "ms": 0.09
+      },
+      "target": "T_le"
+    }
+  ]
+}
