@@ -1,0 +1,110 @@
+{
+  "backend": "python",
+  "decided": 146,
+  "definable_false": 4,
+  "definable_true": 142,
+  "disagreements": [
+    {
+      "definable_no": [
+        "ep/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/ktypes",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "modelo_solo_target",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "ep/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/ktypes",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "posetrombo",
+      "target": "T_half"
+    },
+    {
+      "definable_no": [
+        "ep/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/ktypes",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "retrombo_nodef",
+      "target": "T0"
+    },
+    {
+      "definable_no": [
+        "ep/split"
+      ],
+      "definable_yes": [
+        "atomic_conj/split",
+        "ep/ktypes",
+        "fo/split",
+        "gf/split",
+        "horn/split",
+        "pp/split"
+      ],
+      "model": "retrombo_nodef_sinpura",
+      "target": "T0"
+    }
+  ],
+  "error_samples": [
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 15.0s",
+      "fragment": "pp",
+      "model": "modeloqueanda",
+      "target": "T0"
+    },
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 15.0s",
+      "fragment": "horn",
+      "model": "modeloqueanda",
+      "target": "T0"
+    },
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 15.0s",
+      "fragment": "gf",
+      "model": "modeloqueanda",
+      "target": "T0"
+    },
+    {
+      "engine": "ktypes",
+      "error": "_JobTimeout: timeout after 15.0s",
+      "fragment": "ep",
+      "model": "modeloqueanda",
+      "target": "T0"
+    },
+    {
+      "engine": "split",
+      "error": "_JobTimeout: timeout after 15.0s",
+      "fragment": "atomic_conj",
+      "model": "modeloqueanda",
+      "target": "T0"
+    }
+  ],
+  "errors": 5,
+  "rayon_num_threads": "2",
+  "skipped": 3,
+  "stamp": "20260826_p1c_resweep",
+  "total_rows": 154
+}
