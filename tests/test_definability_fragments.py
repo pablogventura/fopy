@@ -9,7 +9,7 @@ from fopy.finite import check_definability, explain_definability, normalize_frag
 def test_pp_fragment(minimal_model):
     result = check_definability(minimal_model, "T0", fragment="pp")
     assert isinstance(result.definable, bool)
-    assert result.fragment == "pp"
+    assert result.fragment == "pp" or result.fragment.startswith("pp:")
 
 
 @pytest.mark.finite

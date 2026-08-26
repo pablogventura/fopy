@@ -22,7 +22,10 @@ from fopy.structures import Structure
 
 QF_FRAGMENTS = frozenset({"qf", "open", "quantifier-free"})
 KTYPE_FRAGMENTS = frozenset({"pp", "ep", "horn", "fo"})
-SUPPORTED_FRAGMENTS = QF_FRAGMENTS | KTYPE_FRAGMENTS
+ENGINE_FRAGMENTS = frozenset(
+    {"qf_pos", "ex", "atomic_conj", "gf", "guarded", "unary_qf", "pattern"}
+)
+SUPPORTED_FRAGMENTS = QF_FRAGMENTS | KTYPE_FRAGMENTS | ENGINE_FRAGMENTS
 CERT_VERSION = 2
 CERT_VERSION_LEGACY = 1
 
@@ -34,19 +37,14 @@ def normalize_fragment(fragment: str) -> str:
         fragment: User-facing fragment name (e.g. ``"open"``, ``"pp"``, ``"fo"``).
 
     Returns:
-        Canonical fragment key among ``"qf"``, ``"pp"``, ``"ep"``, ``"horn"``,
-        and ``"fo"``.
+        Canonical fragment key.
 
     Raises:
         NotImplementedError: If *fragment* is not a supported alias.
     """
-    key = fragment.strip().lower()
-    if key in QF_FRAGMENTS:
-        return "qf"
-    if key in KTYPE_FRAGMENTS:
-        return key
-    supported = ", ".join(sorted({"qf", "open", "pp", "ep", "horn", "fo"}))
-    raise NotImplementedError(f"Fragment {fragment!r} is not supported. Supported: {supported}.")
+    from fopy.engines.registry import normalize_fragment_engine
+
+    return normalize_fragment_engine(fragment)
 
 
 def resolve_target(model: Model, target: Relation | str) -> Relation:

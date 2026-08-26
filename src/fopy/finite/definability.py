@@ -72,40 +72,34 @@ def check_definability(
     model: Model,
     target: Relation | str,
     fragment: str = "qf",
+    *,
+    engine: str = "auto",
     **kwargs: object,
 ) -> DefinabilityResult:
     """Decide definability of *target* in the requested logic *fragment*.
 
-    Routes quantifier-free fragments to :func:`is_open_definable` (HIT) and
-    dispatches ``pp``, ``ep``, ``horn``, and ``fo`` to the bounded k-type
-    checkers under :mod:`fopy.finite.fragments`.
+    Routes through :mod:`fopy.engines` (split/merge) and legacy k-types/HIT.
 
     Args:
         model: Finite structure providing the signature.
         target: Relation to define.
-        fragment: Fragment name (``"qf"``, ``"open"``, ``"pp"``, ``"ep"``,
-            ``"horn"``, ``"fo"``, …).
-        **kwargs: Forwarded to fragment-specific checkers (``config`` for QF,
-            ``max_depth`` / ``max_k`` for k-type layers).
+        fragment: Fragment name (``qf``, ``qf_pos``, ``ep``, ``ex``, …).
+        engine: ``auto``, ``split``, ``merge``, ``ktypes``, or ``hit``.
+        **kwargs: Forwarded to fragment-specific checkers.
 
     Returns:
         :class:`DefinabilityResult` for the selected fragment.
 
     Raises:
         NotImplementedError: If *fragment* is not supported.
-        ValueError: If k-type enumeration exceeds the partition size guard.
+        ValueError: If enumeration exceeds a size guard.
     """
-    from fopy.finite.explain import normalize_fragment, resolve_target
+    from fopy.engines.registry import check_with_engine
+    from fopy.finite.explain import resolve_target
 
-    norm = normalize_fragment(fragment)
     rel = resolve_target(model, target)
-    if norm == "qf":
-        config = kwargs.get("config")
-        hit_cfg = config if isinstance(config, HitConfig) else None
-        return is_open_definable(model, rel, hit_cfg)
-    from fopy.finite.fragments import check_fragment
-
-    return check_fragment(model, rel, norm, **kwargs)
+    eng = engine if isinstance(engine, str) else "auto"
+    return check_with_engine(model, rel, fragment, engine=eng, **kwargs)  # type: ignore[arg-type]
 
 
 class Definability:
