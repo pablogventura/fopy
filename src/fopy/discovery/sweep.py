@@ -65,7 +65,7 @@ MIN_MEM_AVAILABLE_GIB: float = 4.0
 DEFAULT_RAYON_THREADS: int = 2
 DEFAULT_JOB_TIMEOUT_S: float = 20.0
 
-HEAVY_FRAGMENTS: frozenset[str] = frozenset({"fo", "horn"})
+HEAVY_FRAGMENTS: frozenset[str] = frozenset({"fo"})
 
 
 
@@ -84,11 +84,12 @@ DEFAULT_JOBS: tuple[JobSpec, ...] = (
     JobSpec("qf", "merge"),
     JobSpec("qf_pos", "split"),
     JobSpec("ep", "split"),
+    JobSpec("ep", "ktypes"),
     JobSpec("ex", "split"),
     JobSpec("pp", "split", max_depth=2),
     JobSpec("atomic_conj", "split", max_depth=1),
     JobSpec("gf", "split", max_k=1),
-    JobSpec("fo", "split"),
+    JobSpec("fo", "split", max_k=1),
     JobSpec("horn", "split"),
 )
 
@@ -340,6 +341,7 @@ def run_one(
         prev_backend = os.environ.get("FOPY_ENGINE_BACKEND")
         prev_hit_to = os.environ.get("FOPY_HIT_TIMEOUT_S")
         os.environ["FOPY_ENGINE_BACKEND"] = "rust"
+        os.environ.setdefault("FOPY_SKIP_WITNESS", "1")
         if timeout_s > 0:
             os.environ["FOPY_HIT_TIMEOUT_S"] = str(timeout_s)
 
